@@ -124,6 +124,15 @@ export class Engine extends EventTarget {
     return this;
   }
 
+  /** مسار عرض مباشر لا يعتمد على مزامنة δ: كل إطار يُنسب لموضع المرجع المسموع وقت التقاطه تقريبيًا. للعرض فقط؛ التقييم لا يستعمله. */
+  _pushTrail(f) {
+    const tr = this.trail || (this.trail = []);
+    let tRef = null;
+    if (this.state === 'playing' && this.audio) tRef = this.audio.currentTime - (this.ctx.currentTime - f.tCtx);
+    tr.push({ tRef, wall: performance.now(), tCtx: f.tCtx, c: Number.isFinite(f.f0) && f.f0 > 0 ? 1200 * Math.log2(f.f0 / 100) : NaN, db: f.energyDb, voiced: !!f.voiced && !f.unmeasurable, per: f.periodicity });
+    if (tr.length > 700) tr.splice(0, tr.length - 600);
+  }
+
   // مستوى الإدخال الفوري + تسجيل مقطع قصير محلي (لا يمرّ بكاشف النغمة): يفصل «وصول العيّنات» عن «نجاح قياس النبرة».
   _onRawChunk(m) {
     const n = m.n || 0; if (!n) return;
@@ -315,6 +324,7 @@ export class Engine extends EventTarget {
         for (const f of m.mic) {
           if (this.micMuted || !this.micOn) f.unmeasurable = true;
           this.latest = f;
+          this._pushTrail(f);
           this.collector?.(f);
           this.session.addMic(f);
         }

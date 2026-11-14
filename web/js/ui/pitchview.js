@@ -56,6 +56,47 @@ export class PitchView {
   }
   y(c) { const pad = 12; return this.H - pad - ((c - this.cLo) / (this.cHi - this.cLo)) * (this.H - 2 * pad); }
 
+  /** نقطة صوتك + أثرها القصير + نبضة/مقياس القوة + حالة «صوت بلا نبرة». مسار مباشر مستقل عن مزامنة التأخير. */
+  _drawLive(g, eng, playing, tNow, t0, xn, ink, ok, warn) {
+    this.liveInfo = { state: 'off', points: 0 };
+    if (!eng?.micOn) return;
+    const tr = eng.trail || [], now = performance.now();
+    const recent = tr.filter((p) => now - p.wall < 3500);
+    const last = recent[recent.length - 1];
+    const fresh = last && now - last.wall < 400;
+    // مقياس القوة (شريط جانبي صغير)
+    const db = fresh ? last.db : -90, lvl = Math.max(0, Math.min(1, (db + 60) / 45));
+    const bx = this.prefs.timeDir === 'ltr' ? 6 : this.W - 12, bh = this.H - 24;
+    g.fillStyle = css('--grid'); g.fillRect(bx, 12, 6, bh);
+    g.fillStyle = lvl > 0.02 ? ok : css('--none'); g.fillRect(bx, 12 + bh * (1 - lvl), 6, bh * lvl);
+    const pts = [];
+    for (const p of recent) {
+      if (!p.voiced || !Number.isFinite(p.c)) continue;
+      if (playing) { if (p.tRef == null || p.tRef < t0 || p.tRef > tNow + 0.1) continue; pts.push({ x: this.x(p.tRef, t0), y: this.y(p.c), p }); }
+      else if (now - p.wall < 2200) pts.push({ x: xn + (this.prefs.timeDir === 'ltr' ? -1 : 1) * (now - p.wall) / 2200 * (this.W * 0.3), y: this.y(p.c), p });
+    }
+    // وسيط 3 (إطار واحد تأخير فقط) لإزالة القفزات المفردة
+    const sm = pts.map((q, i) => { const a = [pts[i - 1]?.y ?? q.y, q.y, pts[i + 1]?.y ?? q.y].sort((u, v) => u - v); return { ...q, y: a[1] }; });
+    g.lineCap = 'round'; g.lineJoin = 'round'; g.strokeStyle = ink; g.lineWidth = 2.4; g.globalAlpha = 0.85; g.beginPath();
+    let prev = null;
+    for (const q of sm) { if (prev && Math.abs(q.p.wall - prev.p.wall) < 140 && Math.abs(q.y - prev.y) < this.H * 0.5) g.lineTo(q.x, q.y); else g.moveTo(q.x, q.y); prev = q; }
+    g.stroke(); g.globalAlpha = 1;
+    const head = sm[sm.length - 1];
+    let state = 'silence';
+    if (head && now - head.p.wall < 350) {
+      state = 'pitched';
+      const r = 4 + 12 * lvl;
+      g.fillStyle = ok; g.globalAlpha = 0.25; g.beginPath(); g.arc(head.x, head.y, r + 3, 0, 6.2832); g.fill(); g.globalAlpha = 1;
+      g.fillStyle = ink; g.beginPath(); g.arc(head.x, head.y, 5, 0, 6.2832); g.fill();
+      g.strokeStyle = ok; g.lineWidth = 2; g.beginPath(); g.arc(head.x, head.y, r, 0, 6.2832); g.stroke();
+    } else if (fresh && last.db > -50) {
+      state = 'no-pitch';
+      g.fillStyle = warn; g.font = '600 13px system-ui, sans-serif'; g.textAlign = 'center';
+      g.fillText('صوت يصل — تعذّر تحديد النبرة', this.W / 2, 18);
+    }
+    this.liveInfo = { state, points: sm.length, level: lvl };
+  }
+
   draw() {
     const g = this.ctx2d, ref = this.ref, eng = this.engine;
     const playing = eng?.state === 'playing';
@@ -129,6 +170,7 @@ export class PitchView {
         else { g.beginPath(); g.moveTo(xx, yy - 4.2); g.lineTo(xx + 4.2, yy); g.lineTo(xx, yy + 4.2); g.lineTo(xx - 4.2, yy); g.closePath(); g.fill(); }
       }
     }
+    this._drawLive(g, eng, playing, tNow, t0, xn, ink, ok, warn);
     // إطار الشطر الحالي (حدود تقديرية)
     const hem = this.getHem?.();
     if (hem) {

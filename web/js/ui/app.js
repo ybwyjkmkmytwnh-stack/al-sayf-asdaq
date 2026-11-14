@@ -430,6 +430,7 @@ export class App {
     };
     const step = async (d) => { if (eng?.state === 'playing') await eng.pause(); S.attempt = null; this.setIdx(this.idx + d); result.hidden = true; showHem(this.idx); };
     S.view = new PitchView(canvas, { ref: this.ref, engine: eng, getHem: () => this.hems[this.idx], prefs: this.prefs });
+    window.__pitchView = S.view;
     dirLabel.textContent = this.prefs.timeDir === 'rtl' ? 'الزمن نحو اليسار ←' : 'الزمن نحو اليمين →';
     S.view.start(prefersReducedMotion());
     showHem(this.idx);
