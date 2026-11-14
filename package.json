@@ -1,0 +1,14 @@
+{
+  "name": "al-sayf-asdaq",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "تدريب كاريوكي الشعر العربي: مقارنة أداء المستخدم بتحليل مسبق للتسجيل المرجعي",
+  "scripts": {
+    "serve": "python3 serve.py",
+    "analyze": "python3 analysis/analyze_reference.py",
+    "test:js": "node --test tests/js/*.test.js",
+    "test:py": "cd analysis && python3 -m pytest -q",
+    "test:e2e": "python3 tests/e2e/run_e2e.py"
+  }
+}

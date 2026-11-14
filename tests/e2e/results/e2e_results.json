@@ -1,0 +1,1739 @@
+{
+ "summary": {
+  "passed": 20,
+  "total": 20,
+  "seconds": 401.2,
+  "note": "كل الحالات software-path-only: ميكروفون وهمي/نسخة المرجع المعاد توجيهها؛ لا تمثّل أداء إنسان ولا ميكروفونًا مادّيًا."
+ },
+ "cases": [
+  {
+   "id": "E01",
+   "name": "إقلاع الموقع: تحميل بتقدّم حقيقي + مطابقة بصمة الصوت والنص",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.5,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع ناجح",
+     "boot": {
+      "state": "ready"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "بصمة الصوت والنص المحسوبتان في المتصفح تطابقان التحليل",
+     "a": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+     "t": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+     "h": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+     "th": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+     "n": 10171615
+    },
+    {
+     "ok": true,
+     "msg": "زر «ابدأ التدريب» ظاهر في الصفحة الأولى"
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء في الكونسول",
+     "errors": []
+    }
+   ],
+   "data": {
+    "a": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+    "t": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+    "h": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+    "th": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+    "n": 10171615
+   }
+  },
+  {
+   "id": "E02-audioHash",
+   "name": "التحليل غير المطابق (audioHash) يُرفض ولا يبدأ التدريب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.8,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع يفشل",
+     "boot": {
+      "state": "error",
+      "phase": "verify",
+      "code": "audio-hash",
+      "message": "ملف التحليل لا يطابق ملف الصوت المرفق (بصمة SHA-256 مختلفة). أعد توليده بالأمر: python3 analysis/analyze_reference.py --force"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "رمز الرفض صحيح",
+     "got": "audio-hash"
+    },
+    {
+     "ok": true,
+     "msg": "لا زر ابدأ التدريب"
+    },
+    {
+     "ok": true,
+     "msg": "رسالة الخطأ تذكر أمر إعادة التوليد",
+     "text": "لن يبدأ التدريب: ملف التحليل لا يطابق ملف الصوت المرفق (بصمة SHA-256 مختلفة). أعد توليده بالأمر: python3 analysis/analyze_reference.py --force\nهذا يعني أن ملف التحليل وُلِّد لتسجيل/نص آخر. التقييم مع "
+    }
+   ],
+   "data": {}
+  },
+  {
+   "id": "E02-textHash",
+   "name": "التحليل غير المطابق (textHash) يُرفض ولا يبدأ التدريب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع يفشل",
+     "boot": {
+      "state": "error",
+      "phase": "verify",
+      "code": "text-hash",
+      "message": "ملف التحليل لا يطابق نص القصيدة الحالي. أعد توليده بالأمر: python3 analysis/analyze_reference.py --force"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "رمز الرفض صحيح",
+     "got": "text-hash"
+    },
+    {
+     "ok": true,
+     "msg": "لا زر ابدأ التدريب"
+    },
+    {
+     "ok": true,
+     "msg": "رسالة الخطأ تذكر أمر إعادة التوليد",
+     "text": "لن يبدأ التدريب: ملف التحليل لا يطابق نص القصيدة الحالي. أعد توليده بالأمر: python3 analysis/analyze_reference.py --force\nهذا يعني أن ملف التحليل وُلِّد لتسجيل/نص آخر. التقييم مع تحليل غير مطابق سيكون"
+    }
+   ],
+   "data": {}
+  },
+  {
+   "id": "E03",
+   "name": "نسخة مطابقة للمرجع (تأخير صفر، تعويض الكمون المُبلَّغ) ⇒ درجات عالية وإزاحة ≈ 0",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 15.0,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الدرجة الإجمالية ≥ 0.93",
+     "overall": 0.9440302003046199
+    },
+    {
+     "ok": true,
+     "msg": "الطبقة ≥ 0.90",
+     "pitch": 0.9272452448794718
+    },
+    {
+     "ok": true,
+     "msg": "إزاحة التوقيت ≈ 0 (±12 م.ث)",
+     "off": 0.008144732591869697
+    },
+    {
+     "ok": true,
+     "msg": "محاذاة ساعة التقاط المرجع موثوقة (ارتباط > 0.97)",
+     "sync": {
+      "delta": -32.64525833323912,
+      "corr": 0.9993158498276785,
+      "count": 7,
+      "driftPpm": 22.45402633211997,
+      "lastOk": true,
+      "lastReason": null
+     }
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء كونسول",
+     "errors": []
+    }
+   ],
+   "data": {
+    "s": {
+     "overall": 0.9440302003046199,
+     "reason": "ok",
+     "pitch": 0.9272452448794718,
+     "pitchCov": 0.9381578947368421,
+     "absent": 47,
+     "medErr": 0.4501953125,
+     "offsetSec": 0.008144732591869697,
+     "offsetReliable": true,
+     "onset": 0.9344919786096256,
+     "dyn": 0.9271192754823333,
+     "relDb": 0.823686479124838,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "sync": {
+     "delta": -32.64525833323912,
+     "corr": 0.9993158498276785,
+     "count": 7,
+     "driftPpm": 22.45402633211997,
+     "lastOk": true,
+     "lastReason": null
+    },
+    "total": 0
+   }
+  },
+  {
+   "id": "E04",
+   "name": "تأخير معروف 0.25 ث: يُكتشف بإشارة موجبة (المستخدم متأخر)، ويُعوَّض يدويًا فتعود الدرجة، والاتجاه المعاكس سالب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 34.3,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "بلا تعويض: الإزاحة المقيسة ≈ التأخير − الكمون المُبلَّغ وإشارتها موجبة",
+     "measured": 0.20841152441526725,
+     "expected": 0.208
+    },
+    {
+     "ok": true,
+     "msg": "بلا تعويض: الدرجة تنخفض",
+     "overall": 0.5365737550730673
+    },
+    {
+     "ok": true,
+     "msg": "مع التعويض اليدوي الصحيح: الإزاحة ≈ 0",
+     "off": -0.0010697945600910465
+    },
+    {
+     "ok": true,
+     "msg": "مع التعويض: الدرجة تعود ≥ 0.93",
+     "overall": 0.9611435849018173
+    },
+    {
+     "ok": true,
+     "msg": "تعويض زائد 0.10 ث ⇒ الإزاحة ≈ −0.10 (المستخدم مبكّر): الإشارة صحيحة في الاتجاهين",
+     "off": -0.09178077431658452
+    }
+   ],
+   "data": {
+    "rep": 0.042,
+    "noComp": {
+     "overall": 0.5365737550730673,
+     "reason": "ok",
+     "pitch": 0.6168485614977378,
+     "pitchCov": 0.881578947368421,
+     "absent": 90,
+     "medErr": 9.1490478515625,
+     "offsetSec": 0.20841152441526725,
+     "offsetReliable": true,
+     "onset": 0.9705882352941176,
+     "dyn": 0.7442073698438263,
+     "relDb": 0.8525925418667128,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "comp": {
+     "overall": 0.9611435849018173,
+     "reason": "ok",
+     "pitch": 0.943017752978058,
+     "pitchCov": 0.9544846050870147,
+     "absent": 34,
+     "medErr": -0.152099609375,
+     "offsetSec": -0.0010697945600910465,
+     "offsetReliable": true,
+     "onset": 0.9893048128342247,
+     "dyn": 0.9420990237925989,
+     "relDb": 0.7460146686367324,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 0.9841463414634146
+    },
+    "over": {
+     "overall": 0.8321853227654049,
+     "reason": "ok",
+     "pitch": 0.74895317984079,
+     "pitchCov": 0.8849797023004059,
+     "absent": 85,
+     "medErr": -5.3017578125,
+     "offsetSec": -0.09178077431658452,
+     "offsetReliable": true,
+     "onset": 0.9050802139037433,
+     "dyn": 0.8351632301911434,
+     "relDb": 0.9705820819668105,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 0.974390243902439
+    }
+   }
+  },
+  {
+   "id": "E06",
+   "name": "تغيير سعة الصوت: −12 dB يخفض القوة النسبية ≈ −12 دون المساس بالطبقة؛ +12 dB لا يرفع الدرجة",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 34.3,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "−12 dB ⇒ القوة النسبية ≈ −12",
+     "rel": -11.274947013659238
+    },
+    {
+     "ok": true,
+     "msg": "+12 dB ⇒ القوة النسبية ≈ +12",
+     "rel": 12.867261860566378
+    },
+    {
+     "ok": true,
+     "msg": "الطبقة لا تتأثر بالسعة",
+     "unit": 0.925822644846063,
+     "quiet": 0.9374137358012953,
+     "loud": 0.9258249396073188
+    },
+    {
+     "ok": true,
+     "msg": "بُعد القوة يعاقب الابتعاد عن مستوى المعايرة في الاتجاهين",
+     "unit": 0.9254006739783375,
+     "quiet": 0.120266864840251,
+     "loud": 0
+    },
+    {
+     "ok": true,
+     "msg": "رفع الصوت لا يرفع الدرجة الإجمالية"
+    }
+   ],
+   "data": {
+    "unit": {
+     "overall": 0.9481288978179973,
+     "reason": "ok",
+     "pitch": 0.925822644846063,
+     "pitchCov": 0.9368421052631579,
+     "absent": 48,
+     "medErr": 0.44354248046875,
+     "offsetSec": 0.008218558387432611,
+     "offsetReliable": true,
+     "onset": 0.9652406417112298,
+     "dyn": 0.9254006739783375,
+     "relDb": 0.8257743455936915,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "quiet": {
+     "overall": 0.8368910709764807,
+     "reason": "ok",
+     "pitch": 0.9374137358012953,
+     "pitchCov": 0.9486842105263158,
+     "absent": 39,
+     "medErr": -0.14404296875,
+     "offsetSec": -0.0018530768671180414,
+     "offsetReliable": true,
+     "onset": 0.9893048128342247,
+     "dyn": 0.120266864840251,
+     "relDb": -11.274947013659238,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "loud": {
+     "overall": 0.8093198293638119,
+     "reason": "ok",
+     "pitch": 0.9258249396073188,
+     "pitchCov": 0.9368421052631579,
+     "absent": 48,
+     "medErr": 0.44580078125,
+     "offsetSec": 0.008521285148238937,
+     "offsetReliable": true,
+     "onset": 0.9652406417112298,
+     "dyn": 0,
+     "relDb": 12.867261860566378,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    }
+   }
+  },
+  {
+   "id": "E07",
+   "name": "صمت المستخدم في جزء مطلوب ⇒ غياب (صفر) لا «لم يُقَس»؛ وفشل الجهاز (صمت رقمي) ⇒ غير قابل للقياس",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 24.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "صمت سليم ⇒ طبقة 0 وتغطية 0 وإطارات غياب",
+     "pitch": 0,
+     "pitchCov": 0,
+     "absent": 760
+    },
+    {
+     "ok": true,
+     "msg": "الجهاز سليم (قابل للقياس) والدرجة منخفضة وليست «لم يُقَس»",
+     "meas": 1,
+     "overall": 0
+    },
+    {
+     "ok": true,
+     "msg": "الصمت الرقمي الكامل يُكشف كحدث جهاز",
+     "events": [
+      "digital-silence"
+     ]
+    },
+    {
+     "ok": true,
+     "msg": "فشل الجهاز ⇒ لا درجة (غير قابل للقياس) ولا صفر",
+     "overall": null,
+     "reason": "insufficient-measurable"
+    }
+   ],
+   "data": {
+    "quiet": {
+     "overall": 0,
+     "reason": "ok",
+     "pitch": 0,
+     "pitchCov": 0,
+     "absent": 760,
+     "medErr": null,
+     "offsetSec": 0,
+     "offsetReliable": false,
+     "onset": 0,
+     "dyn": 0,
+     "relDb": null,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "dead": {
+     "overall": null,
+     "reason": "insufficient-measurable",
+     "pitch": null,
+     "pitchCov": null,
+     "absent": null,
+     "medErr": null,
+     "offsetSec": null,
+     "offsetReliable": null,
+     "onset": null,
+     "dyn": null,
+     "relDb": null,
+     "conf": 0.22949999999999998,
+     "allowed": true,
+     "meas": 0
+    },
+    "deadEvents": [
+     "digital-silence"
+    ]
+   }
+  },
+  {
+   "id": "E09",
+   "name": "صمت المرجع ليس نقاطًا مجانية: نافذة بلا نطق مرجعي ⇒ لا درجة",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 9.3,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "لا درجة لنافذة صامتة مرجعيًا",
+     "overall": null,
+     "reason": "no-scorable-reference",
+     "pitch": null,
+     "pitchCov": null,
+     "absent": null,
+     "medErr": null,
+     "offsetSec": null,
+     "offsetReliable": null,
+     "onset": null,
+     "dyn": null,
+     "relDb": null,
+     "conf": 0.22949999999999998,
+     "allowed": true,
+     "meas": 0
+    }
+   ],
+   "data": {
+    "overall": null,
+    "reason": "no-scorable-reference",
+    "pitch": null,
+    "pitchCov": null,
+    "absent": null,
+    "medErr": null,
+    "offsetSec": null,
+    "offsetReliable": null,
+    "onset": null,
+    "dyn": null,
+    "relDb": null,
+    "conf": 0.22949999999999998,
+    "allowed": true,
+    "meas": 0
+   }
+  },
+  {
+   "id": "E10",
+   "name": "تقديم/إعادة الشطر: مقاطع منفصلة بلا خلط بيانات (كل مقطع بمحاذاته الخاصة)",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 19.2,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "ثلاثة مقاطع بأسبابها",
+     "got": [
+      "play",
+      "seek",
+      "restart-line"
+     ]
+    },
+    {
+     "ok": true,
+     "msg": "كل المقاطع مغلقة بعد الإيقاف"
+    },
+    {
+     "ok": true,
+     "msg": "المقطع 1 على مرجع 38–44 فقط",
+     "seg": {
+      "id": 1,
+      "reason": "play",
+      "mic": 445,
+      "tracker": 2,
+      "refMin": 37.54544300936809,
+      "refMax": 41.9854430093681,
+      "closed": true
+     }
+    },
+    {
+     "ok": true,
+     "msg": "المقطع 2 (بعد التقديم) على مرجع ≈150–156 فقط",
+     "seg": {
+      "id": 2,
+      "reason": "seek",
+      "mic": 445,
+      "tracker": 2,
+      "refMin": 149.33783745876934,
+      "refMax": 153.77783745876934,
+      "closed": true
+     }
+    },
+    {
+     "ok": true,
+     "msg": "المقطع 3 (إعادة الشطر) على مرجع 38–44 فقط",
+     "seg": {
+      "id": 3,
+      "reason": "restart-line",
+      "mic": 470,
+      "tracker": 2,
+      "refMin": 37.546110421422895,
+      "refMax": 42.23611042142289,
+      "closed": true
+     }
+    },
+    {
+     "ok": true,
+     "msg": "نافذة 39.5–41.5 تُقرأ من المقطع الأحدث (إعادة الشطر) لا الأقدم",
+     "w": {
+      "id": 3,
+      "cov": 2
+     },
+     "latest": 3
+    },
+    {
+     "ok": true,
+     "msg": "نافذة 152–154 تُقرأ من مقطع التقديم",
+     "w": {
+      "id": 2,
+      "cov": 1.78
+     },
+     "seek": 2
+    }
+   ],
+   "data": {
+    "segs": [
+     {
+      "id": 1,
+      "reason": "play",
+      "mic": 445,
+      "tracker": 2,
+      "refMin": 37.54544300936809,
+      "refMax": 41.9854430093681,
+      "closed": true
+     },
+     {
+      "id": 2,
+      "reason": "seek",
+      "mic": 445,
+      "tracker": 2,
+      "refMin": 149.33783745876934,
+      "refMax": 153.77783745876934,
+      "closed": true
+     },
+     {
+      "id": 3,
+      "reason": "restart-line",
+      "mic": 470,
+      "tracker": 2,
+      "refMin": 37.546110421422895,
+      "refMax": 42.23611042142289,
+      "closed": true
+     }
+    ],
+    "w1": {
+     "id": 3,
+     "cov": 2
+    },
+    "w2": {
+     "id": 2,
+     "cov": 1.78
+    }
+   }
+  },
+  {
+   "id": "E11",
+   "name": "مستوى الاستماع لا يؤثر على التقييم: نفس النافذة بمستوى 0.8 ثم 0.05 ⇒ نفس الدرجة وδ",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 35.4,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الدرجة الإجمالية متطابقة",
+     "hi": 0.9469133272396044,
+     "lo": 0.9484623699395173
+    },
+    {
+     "ok": true,
+     "msg": "الطبقة والقوة النسبية متطابقتان"
+    },
+    {
+     "ok": true,
+     "msg": "تغيير المستوى أثناء التشغيل لا يغيّر δ المقيس (تشتت < 6 م.ث)",
+     "n": 8,
+     "spreadMs": 0.6370367495325269
+    }
+   ],
+   "data": {
+    "hi": {
+     "overall": 0.9469133272396044,
+     "reason": "ok",
+     "pitch": 0.9311926133005244,
+     "pitchCov": 0.9421052631578948,
+     "absent": 44,
+     "medErr": 0.4482421875,
+     "offsetSec": 0.008145295753875615,
+     "offsetReliable": true,
+     "onset": 0.9344919786096256,
+     "dyn": 0.9310666439033859,
+     "relDb": 0.8193911300037442,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "dHi": -47.11526483792675,
+    "lo": {
+     "overall": 0.9484623699395173,
+     "reason": "ok",
+     "pitch": 0.9335912758275082,
+     "pitchCov": 0.9447368421052632,
+     "absent": 42,
+     "medErr": -0.10791015625,
+     "offsetSec": -0.0019123894365933498,
+     "offsetReliable": true,
+     "onset": 0.9358288770053476,
+     "dyn": 0.9334751683298061,
+     "relDb": 0.7853468642566739,
+     "conf": 0.765,
+     "allowed": true,
+     "meas": 1
+    },
+    "dLo": -47.13456862743928,
+    "midRun": {
+     "n": 8,
+     "spreadMs": 0.6370367495325269
+    }
+   }
+  },
+  {
+   "id": "E12",
+   "name": "أحداث الأجهزة: كتم/فصل الميكروفون/تعليق السياق ⇒ توقف واضح وعدم احتساب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 6.9,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "إعدادات المسار الفعلية: بلا AGC/NS/EC في وضع السماعات",
+     "track": {
+      "label": "Fake Default Audio Input",
+      "synthetic": false,
+      "settings": {
+       "autoGainControl": false,
+       "channelCount": 2,
+       "deviceId": "default",
+       "echoCancellation": false,
+       "groupId": "090a7477ce7222a1a875f2a27f3a134b8685e97fd73beac1a44598a9ec21fdae",
+       "latency": 0.01,
+       "noiseSuppression": false,
+       "sampleRate": 44100,
+       "sampleSize": 16,
+       "voiceIsolation": false
+      },
+      "processing": {
+       "agc": false,
+       "ns": false,
+       "ec": false
+      },
+      "processingOn": false,
+      "honored": true,
+      "inputLatencyKnown": true
+     }
+    },
+    {
+     "ok": true,
+     "msg": "الكتم يُعلَّم ويجعل الإطارات الأخيرة غير قابلة للقياس",
+     "flag": true,
+     "tail": 0
+    },
+    {
+     "ok": true,
+     "msg": "تعليق السياق يوقف الجلسة بسبب واضح",
+     "reason": "ctx-suspended"
+    },
+    {
+     "ok": true,
+     "msg": "انقطاع المسار يوقف الجلسة ويُعلن",
+     "reason": "mic-ended"
+    }
+   ],
+   "data": {
+    "track": {
+     "label": "Fake Default Audio Input",
+     "synthetic": false,
+     "settings": {
+      "autoGainControl": false,
+      "channelCount": 2,
+      "deviceId": "default",
+      "echoCancellation": false,
+      "groupId": "090a7477ce7222a1a875f2a27f3a134b8685e97fd73beac1a44598a9ec21fdae",
+      "latency": 0.01,
+      "noiseSuppression": false,
+      "sampleRate": 44100,
+      "sampleSize": 16,
+      "voiceIsolation": false
+     },
+     "processing": {
+      "agc": false,
+      "ns": false,
+      "ec": false
+     },
+     "processingOn": false,
+     "honored": true,
+     "inputLatencyKnown": true
+    },
+    "mutedFlag": true,
+    "mutedMeasTail": 0,
+    "suspendReason": "ctx-suspended",
+    "stateAfterSuspend": "ready",
+    "endedReason": "mic-ended",
+    "micOnAfterEnd": false,
+    "codes": [
+     "ctx-state",
+     "mic-on",
+     "mic-muted",
+     "mic-unmuted",
+     "ctx-state",
+     "ctx-suspended",
+     "ctx-state",
+     "mic-ended"
+    ]
+   }
+  },
+  {
+   "id": "E14",
+   "name": "غياب خادم الفيديو لا يؤثر على التدريب ويُعرض بوضوح",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "فحص الخادم يفشل برسالة عربية واضحة",
+     "chk": {
+      "ok": false,
+      "error": "خادم توليد الفيديو المحلي غير متاح. التدريب لا يتأثر؛ شغّل الخادم لاحقًا إن أردت الفيديو."
+     }
+    },
+    {
+     "ok": true,
+     "msg": "التوليد يفشل برسالة ولا يرمي استثناءً",
+     "gen": {
+      "ok": false,
+      "error": "خادم توليد الفيديو المحلي غير متاح. التدريب لا يتأثر؛ شغّل الخادم لاحقًا إن أردت الفيديو."
+     }
+    },
+    {
+     "ok": true,
+     "msg": "محرّك التدريب سليم بعد فشل الفيديو"
+    },
+    {
+     "ok": true,
+     "msg": "لا استثناءات غير معالجة"
+    }
+   ],
+   "data": {
+    "chk": {
+     "ok": false,
+     "error": "خادم توليد الفيديو المحلي غير متاح. التدريب لا يتأثر؛ شغّل الخادم لاحقًا إن أردت الفيديو."
+    },
+    "gen": {
+     "ok": false,
+     "error": "خادم توليد الفيديو المحلي غير متاح. التدريب لا يتأثر؛ شغّل الخادم لاحقًا إن أردت الفيديو."
+    },
+    "engineState": "ready"
+   }
+  },
+  {
+   "id": "E17",
+   "name": "كشف التسرّب: ميكروفون = نسخة من المرجع ⇒ تسرّب ويُعطَّل التقييم الرقمي؛ ميكروفون ساكن ⇒ لا تسرّب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 25.0,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "تسرّب مُحاكى مُكتشف",
+     "level": 0.9757240397690828
+    },
+    {
+     "ok": true,
+     "msg": "تأخر التسرّب المقيس ≈ 80 م.ث",
+     "lag": 80
+    },
+    {
+     "ok": true,
+     "msg": "مع التسرّب: الدرجة الرقمية معطّلة (تُحجب)",
+     "allowed": false
+    },
+    {
+     "ok": true,
+     "msg": "ميكروفون ساكن: لا تسرّب",
+     "level": 0.02407456273215664,
+     "detected": false
+    }
+   ],
+   "data": {
+    "leaky": {
+     "probed": true,
+     "valid": true,
+     "level": 0.9757240397690828,
+     "lagMs": 80,
+     "micProbeDb": -13.093591813423757,
+     "relVoiceDb": -0.5935918134237568,
+     "detected": true,
+     "weak": false,
+     "monitorHits": 0,
+     "monitorLevel": 0.973450230480829,
+     "at": 1794591166698,
+     "userSilent": false
+    },
+    "leakyScore": {
+     "overall": null,
+     "reason": "leak-violation",
+     "pitch": 0.8714989156622638,
+     "pitchCov": 0.9105263157894737,
+     "absent": 68,
+     "medErr": 2.091796875,
+     "offsetSec": 0.03828442609229381,
+     "offsetReliable": true,
+     "onset": 0.9652406417112298,
+     "dyn": 0.8919406417169066,
+     "relDb": 0.9339864730834968,
+     "conf": 0.18000000000000002,
+     "allowed": false,
+     "meas": 1
+    },
+    "leakyAllowed": false,
+    "leakyWithheld": 0.9203172125836296,
+    "clean": {
+     "probed": true,
+     "valid": true,
+     "level": 0.02407456273215664,
+     "lagMs": 102.44897959183673,
+     "micProbeDb": -68.61874356187349,
+     "relVoiceDb": -56.11874356187349,
+     "detected": false,
+     "weak": false,
+     "monitorHits": 0,
+     "monitorLevel": 0.02407456273215664,
+     "at": 1794591184657,
+     "userSilent": true
+    },
+    "cleanNoise": -68.59650599840269
+   }
+  },
+  {
+   "id": "E05",
+   "name": "تشغيل طويل (120 ث): لا انجراف في المحاذاة ولا تراكم خطأ زمني",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 125.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "التشغيل استمر المدة المطلوبة بلا انقطاع",
+     "played": 119.939773
+    },
+    {
+     "ok": true,
+     "msg": "قياسات δ كافية",
+     "n": 116
+    },
+    {
+     "ok": true,
+     "msg": "تشتت δ عبر التشغيل < 8 م.ث",
+     "spread": 0.3984114886197432
+    },
+    {
+     "ok": true,
+     "msg": "δ الأخير ≈ الأول (< 6 م.ث): لا انجراف",
+     "delta": 0.21867108304718386
+    },
+    {
+     "ok": true,
+     "msg": "كل المحاذاات عالية الارتباط",
+     "corrMin": 0.9985254672448467
+    },
+    {
+     "ok": true,
+     "msg": "الإزاحة المقيسة في نوافذ متباعدة ≈ 0 (لا تراكم)",
+     "wins": [
+      [
+       22,
+       -0.0012
+      ],
+      [
+       42,
+       0.0002
+      ],
+      [
+       62,
+       -0.0015
+      ],
+      [
+       82,
+       0.0022
+      ],
+      [
+       102,
+       0.0002
+      ],
+      [
+       122,
+       -0.0001
+      ]
+     ]
+    },
+    {
+     "ok": true,
+     "msg": "مقطع واحد مستمر"
+    }
+   ],
+   "data": {
+    "played": 119.939773,
+    "n": 116,
+    "spreadMs": 0.3984114886197432,
+    "firstLastMs": 0.21867108304718386,
+    "driftPpm": 4.00433974511556,
+    "corrMin": 0.9985254672448467,
+    "wins": [
+     {
+      "w0": 22,
+      "off": -0.0012332345918444657,
+      "rel": true,
+      "overall": 0.9709192279215948
+     },
+     {
+      "w0": 42,
+      "off": 0.0002056071584139598,
+      "rel": true,
+      "overall": 0.9782416755425141
+     },
+     {
+      "w0": 62,
+      "off": -0.001463353426048541,
+      "rel": true,
+      "overall": 0.9844956218571564
+     },
+     {
+      "w0": 82,
+      "off": 0.0021513651333886293,
+      "rel": true,
+      "overall": 0.9589131800146609
+     },
+     {
+      "w0": 102,
+      "off": 0.0001830888763406929,
+      "rel": true,
+      "overall": 0.9549622218653795
+     },
+     {
+      "w0": 122,
+      "off": -8.934448388652918e-05,
+      "rel": true,
+      "overall": 0.9838251222797876
+     }
+    ],
+    "trackerCount": 64,
+    "segs": 1
+   }
+  },
+  {
+   "id": "E13",
+   "name": "رفض/غياب/انشغال الميكروفون ⇒ رسالة عربية واضحة وبقاء الاستماع متاحًا",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 5.5,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "خطأ حقيقي من المتصفح يُترجم لرمز معروف (لا unknown)",
+     "result": {
+      "ok": false,
+      "code": "not-supported",
+      "message": "لا يتيح هذا المتصفح أو هذا الوضع الوصول إلى الميكروفون (قد يكون وضعًا بلا واجهة أذونات أو صفحة غير آمنة). افتح الموقع في Chrome أو Safari حديث عبر localhost أو HTTPS. يمكنك الاستماع للتسجيل دون ميكروفون.",
+      "fatal": true
+     }
+    },
+    {
+     "ok": true,
+     "msg": "الرسالة عربية بلا نص إنجليزي خام",
+     "text": "لا يتيح هذا المتصفح أو هذا الوضع الوصول إلى الميكروفون (قد يكون وضعًا بلا واجهة أذونات أو صفحة غير آمنة). افتح الموقع في Chrome أو Safari حديث عبر localhost أو HTTPS. يمكنك الاستماع للتسجيل دون ميكروفون."
+    },
+    {
+     "ok": true,
+     "msg": "NotAllowedError ⇒ رسالة عربية في بطاقة الميكروفون (permission-denied)",
+     "text": "تم رفض إذن الميكروفون. اسمح بالوصول من أيقونة القفل بجانب عنوان الصفحة ثم أعد المحاولة. يمكنك الاستم"
+    },
+    {
+     "ok": true,
+     "msg": "رسالة الرفض تذكر أن الاستماع بلا ميكروفون ممكن",
+     "text": "تم رفض إذن الميكروفون. اسمح بالوصول من أيقونة القفل بجانب عنوان الصفحة ثم أعد المحاولة. يمكنك الاستماع للتسجيل دون ميكروفون."
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء صفحة غير متوقعة بعد الرفض",
+     "errors": []
+    },
+    {
+     "ok": true,
+     "msg": "NotFoundError ⇒ رسالة عربية في بطاقة الميكروفون (no-device)",
+     "text": "لم يُعثر على ميكروفون. وصّل ميكروفونًا (أو سماعة بميكروفون) ثم أعد المحاولة."
+    },
+    {
+     "ok": true,
+     "msg": "NotReadableError ⇒ رسالة عربية في بطاقة الميكروفون (device-busy)",
+     "text": "تعذّر فتح الميكروفون: قد يكون مستخدمًا في تطبيق آخر أو معطّلًا في النظام."
+    },
+    {
+     "ok": true,
+     "msg": "SecurityError ⇒ رسالة عربية في بطاقة الميكروفون (insecure-context)",
+     "text": "الميكروفون يتطلب صفحة آمنة. شغّل الموقع عبر localhost (python3 serve.py) أو HTTPS."
+    }
+   ],
+   "data": {
+    "real_headless": {
+     "ok": false,
+     "code": "not-supported",
+     "message": "لا يتيح هذا المتصفح أو هذا الوضع الوصول إلى الميكروفون (قد يكون وضعًا بلا واجهة أذونات أو صفحة غير آمنة). افتح الموقع في Chrome أو Safari حديث عبر localhost أو HTTPS. يمكنك الاستماع للتسجيل دون ميكروفون.",
+     "fatal": true
+    }
+   }
+  },
+  {
+   "id": "E15",
+   "name": "ميكروفون وهمي (نغمة 220 هرتز): طبقة صحيحة، إطارات كل 10 م.ث تمامًا، إعدادات المسار الفعلية",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 5.2,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الطبقة المقاسة ≈ 220 هرتز",
+     "f0": 220.0107261294424,
+     "voicedFrac": 1
+    },
+    {
+     "ok": true,
+     "msg": "ثبات الطبقة ضمن ±6 هرتز",
+     "p5": 220.0064686865452,
+     "p95": 220.01491913481163
+    },
+    {
+     "ok": true,
+     "msg": "تباعد الإطارات 10 م.ث تمامًا (شبكة ساعة السياق)",
+     "dt": [
+      0.009999999999999787,
+      0.010000000000000675
+     ]
+    },
+    {
+     "ok": true,
+     "msg": "الطاقة ≈ −20 dBFS كما في الملف",
+     "db": -20.009187617616284
+    },
+    {
+     "ok": true,
+     "msg": "المسار الفعلي بلا معالجة",
+     "track": {
+      "agc": false,
+      "ns": false,
+      "ec": false
+     }
+    },
+    {
+     "ok": true,
+     "msg": "السياق يعمل",
+     "ctx": {
+      "state": "running",
+      "sampleRate": 44100,
+      "baseLatency": 0.01,
+      "outputLatency": 0.032
+     }
+    }
+   ],
+   "data": {
+    "n": 401,
+    "voicedFrac": 1,
+    "medF0": 220.0107261294424,
+    "p5": 220.0064686865452,
+    "p95": 220.01491913481163,
+    "dtMin": 0.009999999999999787,
+    "dtMax": 0.010000000000000675,
+    "db": -20.009187617616284,
+    "ctx": {
+     "state": "running",
+     "sampleRate": 44100,
+     "baseLatency": 0.01,
+     "outputLatency": 0.032
+    },
+    "track": {
+     "label": "Fake Default Audio Input",
+     "synthetic": false,
+     "settings": {
+      "autoGainControl": false,
+      "channelCount": 2,
+      "deviceId": "default",
+      "echoCancellation": false,
+      "groupId": "ba3a5dd555e424efe41379b9c8d37adaf38579a7ef5071e08f14fc27ea645b0a",
+      "latency": 0.01,
+      "noiseSuppression": false,
+      "sampleRate": 44100,
+      "sampleSize": 16,
+      "voiceIsolation": false
+     },
+     "processing": {
+      "agc": false,
+      "ns": false,
+      "ec": false
+     },
+     "processingOn": false,
+     "honored": true,
+     "inputLatencyKnown": true
+    },
+    "analyzer": {
+     "ctxRate": 44100,
+     "effectiveRate": 22050,
+     "decimation": 2,
+     "geometry": {
+      "sr": 22050,
+      "W": 882,
+      "tauMin": 27,
+      "tauMax": 340,
+      "L": 1223
+     }
+    }
+   }
+  },
+  {
+   "id": "E16",
+   "name": "ميكروفون وهمي: صمت رقمي ⇒ حدث جهاز وغير قابل للقياس؛ ضجيج منخفض ⇒ لا جهر ولا طبقة",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 9.1,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الصمت الرقمي يُكتشف",
+     "codes": [
+      "ctx-state",
+      "mic-on",
+      "digital-silence",
+      "digital-silence-end",
+      "digital-silence"
+     ]
+    },
+    {
+     "ok": true,
+     "msg": "أغلب الإطارات غير قابلة للقياس بعد ثانية من الصمت الرقمي",
+     "measFrac": 0
+    },
+    {
+     "ok": true,
+     "msg": "ضجيج أبيض ⇒ لا جهر (لا طبقة وهمية)",
+     "voiced": 0
+    },
+    {
+     "ok": true,
+     "msg": "طاقة الضجيج ضمن نطاق التحليل ≈ −40 dBFS + تصحيح النطاق (-43.5)",
+     "db": -44.071068359648905,
+     "fs": 44100,
+     "D": 2
+    }
+   ],
+   "data": {
+    "silence": {
+     "codes": [
+      "ctx-state",
+      "mic-on",
+      "digital-silence",
+      "digital-silence-end",
+      "digital-silence"
+     ],
+     "measFrac": 0,
+     "n": 371
+    },
+    "noise": {
+     "voiced": 0,
+     "db": -44.071068359648905,
+     "fs": 44100,
+     "D": 2
+    },
+    "noiseExpectedDb": -43.46787486224656
+   }
+  },
+  {
+   "id": "E18",
+   "name": "تدفق الواجهة الكامل (جوال): ابدأ التدريب → إذن → معايرة → غنِّ مع الشطر → نتيجة → مراجعة",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 34.4,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "قيست أرضية الضجيج",
+     "nf": -66.03060852434584
+    },
+    {
+     "ok": true,
+     "msg": "قيس مستوى الصوت المريح",
+     "cal": {
+      "done": false,
+      "noiseFloorDb": -66.03060852434584,
+      "noiseP95Db": -65.6845666284077,
+      "comfortLevelDb": -10.12495133582793,
+      "userMedianCents": 1277.7684157197568,
+      "rangeCents": {
+       "p10": 545.9481697177259,
+       "p90": 1347.5522419668416
+      },
+      "offsetCents": 500,
+      "suggestedOffsetCents": 500,
+      "voicedSec": 1.62,
+      "at": null
+     }
+    },
+    {
+     "ok": true,
+     "msg": "المحاذاة قيست أثناء الغناء عبر الواجهة",
+     "sync": {
+      "delta": 24.095196038693462,
+      "corr": 0.993305444313256,
+      "count": 1,
+      "driftPpm": 0,
+      "lastOk": true,
+      "lastReason": null
+     }
+    },
+    {
+     "ok": true,
+     "msg": "عنوان النتيجة «تقييم تشابه الأداء الصوتي»",
+     "text": "٣٣٪\nتقييم تشابه الأداء الصوتي\n✕ ضعيف · الثقة ٧٧٪\nالتفاصيل\nأعد المحاولة"
+    },
+    {
+     "ok": true,
+     "msg": "المراجعة تعرض حدود النطاق"
+    },
+    {
+     "ok": true,
+     "msg": "نص النطاق (لا نطق/حركات) ظاهر في المراجعة"
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء في الكونسول",
+     "errors": []
+    }
+   ],
+   "data": {
+    "calibration": {
+     "done": false,
+     "noiseFloorDb": -66.03060852434584,
+     "noiseP95Db": -65.6845666284077,
+     "comfortLevelDb": -10.12495133582793,
+     "userMedianCents": 1277.7684157197568,
+     "rangeCents": {
+      "p10": 545.9481697177259,
+      "p90": 1347.5522419668416
+     },
+     "offsetCents": 500,
+     "suggestedOffsetCents": 500,
+     "voicedSec": 1.62,
+     "at": null
+    },
+    "leak": {
+     "probed": true,
+     "valid": true,
+     "level": 0.027380622731906362,
+     "lagMs": 359.1836734693877,
+     "micProbeDb": -66.0327736486598,
+     "relVoiceDb": -55.90782231283187,
+     "detected": false,
+     "weak": false,
+     "monitorHits": 0,
+     "monitorLevel": 0.02423192110750621,
+     "at": 1794591350886,
+     "userSilent": true
+    },
+    "live": {
+     "state": "playing",
+     "sync": {
+      "delta": 24.095196038693462,
+      "corr": 0.993305444313256,
+      "count": 1,
+      "driftPpm": 0,
+      "lastOk": true,
+      "lastReason": null
+     },
+     "hint": "",
+     "inds": [
+      "bad:أعلى",
+      "bad:مبكر",
+      "ok:مناسبة"
+     ]
+    },
+    "result_text": "٣٣٪\nتقييم تشابه الأداء الصوتي\n✕ ضعيف · الثقة ٧٧٪\nالتفاصيل\nأعد المحاولة"
+   }
+  },
+  {
+   "id": "E19",
+   "name": "لقطات الشاشات (سطح مكتب/جوال، فاتح/داكن): فهرس، إعدادات، شرح، محرّر التوقيت، استماع",
+   "kind": "visual",
+   "passed": true,
+   "seconds": 7.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "لا أخطاء كونسول (desktop)",
+     "errors": []
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء كونسول (mobile_dark)",
+     "errors": []
+    }
+   ],
+   "data": {}
+  },
+  {
+   "id": "E20",
+   "name": "تخطيط شاشة التدريب بأحجام مختلفة: لا تجاوز أفقي، والمؤشرات ظاهرة فوق الشريط اللاصق على جوال ≥ 844 ارتفاعًا",
+   "kind": "visual",
+   "passed": true,
+   "seconds": 5.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "m390x844: دقة لوحة الرسم تطابق حجمها الظاهر (لا ضبابية من التمدّد)",
+     "canvas": {
+      "cw": 676,
+      "ch": 320,
+      "w": 338,
+      "h": 160,
+      "dpr": 2
+     }
+    },
+    {
+     "ok": true,
+     "msg": "m390x844: لا تجاوز أفقي",
+     "scrollW": 390,
+     "innerW": 390
+    },
+    {
+     "ok": true,
+     "msg": "m390x844: الرسم لا يختفي خلف الشريط اللاصق",
+     "canvasBottom": 547.109375,
+     "stickyTop": 773
+    },
+    {
+     "ok": true,
+     "msg": "m390x844: المؤشرات الثلاثة ظاهرة كاملة فوق الشريط اللاصق دون تمرير",
+     "indBottom": 694.984375,
+     "stickyTop": 773
+    },
+    {
+     "ok": true,
+     "msg": "m390x844: زر الاستماع للشطر متاح"
+    },
+    {
+     "ok": true,
+     "msg": "m390x844: لا أخطاء كونسول",
+     "errors": []
+    },
+    {
+     "ok": true,
+     "msg": "m360x740: دقة لوحة الرسم تطابق حجمها الظاهر (لا ضبابية من التمدّد)",
+     "canvas": {
+      "cw": 616,
+      "ch": 320,
+      "w": 308,
+      "h": 160,
+      "dpr": 2
+     }
+    },
+    {
+     "ok": true,
+     "msg": "m360x740: لا تجاوز أفقي",
+     "scrollW": 360,
+     "innerW": 360
+    },
+    {
+     "ok": true,
+     "msg": "m360x740: الرسم لا يختفي خلف الشريط اللاصق",
+     "canvasBottom": 489.390625,
+     "stickyTop": 669
+    },
+    {
+     "ok": true,
+     "msg": "m360x740: زر الاستماع للشطر متاح"
+    },
+    {
+     "ok": true,
+     "msg": "m360x740: لا أخطاء كونسول",
+     "errors": []
+    },
+    {
+     "ok": true,
+     "msg": "m390x700: دقة لوحة الرسم تطابق حجمها الظاهر (لا ضبابية من التمدّد)",
+     "canvas": {
+      "cw": 676,
+      "ch": 320,
+      "w": 338,
+      "h": 160,
+      "dpr": 2
+     }
+    },
+    {
+     "ok": true,
+     "msg": "m390x700: لا تجاوز أفقي",
+     "scrollW": 390,
+     "innerW": 390
+    },
+    {
+     "ok": true,
+     "msg": "m390x700: الرسم لا يختفي خلف الشريط اللاصق",
+     "canvasBottom": 458.875,
+     "stickyTop": 629
+    },
+    {
+     "ok": true,
+     "msg": "m390x700: زر الاستماع للشطر متاح"
+    },
+    {
+     "ok": true,
+     "msg": "m390x700: لا أخطاء كونسول",
+     "errors": []
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: دقة لوحة الرسم تطابق حجمها الظاهر (لا ضبابية من التمدّد)",
+     "canvas": {
+      "cw": 677,
+      "ch": 230,
+      "w": 677.09375,
+      "h": 230,
+      "dpr": 1
+     }
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: لا تجاوز أفقي",
+     "scrollW": 1280,
+     "innerW": 1280
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: الرسم لا يختفي خلف الشريط اللاصق",
+     "canvasBottom": 656.875,
+     "stickyTop": 711
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: المؤشرات الثلاثة ظاهرة كاملة فوق الشريط اللاصق دون تمرير",
+     "indBottom": 345.59375,
+     "stickyTop": 711
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: زر الاستماع للشطر متاح"
+    },
+    {
+     "ok": true,
+     "msg": "d1280x800: لا أخطاء كونسول",
+     "errors": []
+    }
+   ],
+   "data": {
+    "m390x844_canvas": {
+     "cw": 676,
+     "ch": 320,
+     "w": 338,
+     "h": 160,
+     "dpr": 2
+    },
+    "m390x844": {
+     "innerW": 390,
+     "innerH": 844,
+     "scrollW": 390,
+     "ind": {
+      "top": 601.578125,
+      "bottom": 694.984375,
+      "left": 12,
+      "right": 378,
+      "h": 93.40625,
+      "vis": true
+     },
+     "sticky": {
+      "top": 773,
+      "bottom": 844,
+      "left": 0,
+      "right": 390,
+      "h": 71,
+      "vis": true
+     },
+     "canvas": {
+      "top": 387.109375,
+      "bottom": 547.109375,
+      "left": 26,
+      "right": 364,
+      "h": 160,
+      "vis": true
+     },
+     "lines": {
+      "top": 93.59375,
+      "bottom": 361.109375,
+      "left": 12,
+      "right": 378,
+      "h": 267.515625,
+      "vis": true
+     },
+     "listen": {
+      "top": 307.109375,
+      "bottom": 347.109375,
+      "left": 112.421875,
+      "right": 277.59375,
+      "h": 40,
+      "vis": true
+     },
+     "alt": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "h": 0,
+      "vis": false
+     }
+    },
+    "m360x740_canvas": {
+     "cw": 616,
+     "ch": 320,
+     "w": 308,
+     "h": 160,
+     "dpr": 2
+    },
+    "m360x740": {
+     "innerW": 360,
+     "innerH": 740,
+     "scrollW": 360,
+     "ind": {
+      "top": 543.859375,
+      "bottom": 637.265625,
+      "left": 12,
+      "right": 348,
+      "h": 93.40625,
+      "vis": true
+     },
+     "sticky": {
+      "top": 669,
+      "bottom": 740,
+      "left": 0,
+      "right": 360,
+      "h": 71,
+      "vis": true
+     },
+     "canvas": {
+      "top": 329.390625,
+      "bottom": 489.390625,
+      "left": 26,
+      "right": 334,
+      "h": 160,
+      "vis": true
+     },
+     "lines": {
+      "top": 93.59375,
+      "bottom": 303.390625,
+      "left": 12,
+      "right": 348,
+      "h": 209.796875,
+      "vis": true
+     },
+     "listen": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "h": 0,
+      "vis": true
+     },
+     "alt": {
+      "top": 684.3125,
+      "bottom": 714.828125,
+      "left": 212.21875,
+      "right": 322.484375,
+      "h": 30.515625,
+      "vis": true
+     }
+    },
+    "m390x700_canvas": {
+     "cw": 676,
+     "ch": 320,
+     "w": 338,
+     "h": 160,
+     "dpr": 2
+    },
+    "m390x700": {
+     "innerW": 390,
+     "innerH": 700,
+     "scrollW": 390,
+     "ind": {
+      "top": 513.34375,
+      "bottom": 606.75,
+      "left": 12,
+      "right": 378,
+      "h": 93.40625,
+      "vis": true
+     },
+     "sticky": {
+      "top": 629,
+      "bottom": 700,
+      "left": 0,
+      "right": 390,
+      "h": 71,
+      "vis": true
+     },
+     "canvas": {
+      "top": 298.875,
+      "bottom": 458.875,
+      "left": 26,
+      "right": 364,
+      "h": 160,
+      "vis": true
+     },
+     "lines": {
+      "top": 93.59375,
+      "bottom": 272.875,
+      "left": 12,
+      "right": 378,
+      "h": 179.28125,
+      "vis": true
+     },
+     "listen": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "h": 0,
+      "vis": true
+     },
+     "alt": {
+      "top": 653.796875,
+      "bottom": 684.3125,
+      "left": 227.21875,
+      "right": 337.484375,
+      "h": 30.515625,
+      "vis": true
+     }
+    },
+    "d1280x800_canvas": {
+     "cw": 677,
+     "ch": 230,
+     "w": 677.09375,
+     "h": 230,
+     "dpr": 1
+    },
+    "d1280x800": {
+     "innerW": 1280,
+     "innerH": 800,
+     "scrollW": 1280,
+     "ind": {
+      "top": 103.59375,
+      "bottom": 345.59375,
+      "left": 68.015625,
+      "right": 492.90625,
+      "h": 242,
+      "vis": true
+     },
+     "sticky": {
+      "top": 711,
+      "bottom": 800,
+      "left": 56,
+      "right": 1224,
+      "h": 89,
+      "vis": true
+     },
+     "canvas": {
+      "top": 426.875,
+      "bottom": 656.875,
+      "left": 522.90625,
+      "right": 1200,
+      "h": 230,
+      "vis": true
+     },
+     "lines": {
+      "top": 103.59375,
+      "bottom": 398.875,
+      "left": 510.90625,
+      "right": 1212,
+      "h": 295.28125,
+      "vis": true
+     },
+     "listen": {
+      "top": 340.875,
+      "bottom": 380.875,
+      "left": 778.875,
+      "right": 944.046875,
+      "h": 40,
+      "vis": true
+     },
+     "alt": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "h": 0,
+      "vis": false
+     }
+    }
+   }
+  }
+ ]
+}

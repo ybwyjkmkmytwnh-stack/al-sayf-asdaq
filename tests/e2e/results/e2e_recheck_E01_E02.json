@@ -1,0 +1,119 @@
+{
+ "summary": {
+  "passed": 3,
+  "total": 3,
+  "seconds": 3.1,
+  "note": "كل الحالات software-path-only: ميكروفون وهمي/نسخة المرجع المعاد توجيهها؛ لا تمثّل أداء إنسان ولا ميكروفونًا مادّيًا."
+ },
+ "cases": [
+  {
+   "id": "E01",
+   "name": "إقلاع الموقع: تحميل بتقدّم حقيقي + مطابقة بصمة الصوت والنص",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.5,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع ناجح",
+     "boot": {
+      "state": "ready"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "بصمة الصوت والنص المحسوبتان في المتصفح تطابقان التحليل",
+     "a": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+     "t": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+     "h": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+     "th": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+     "n": 10171615
+    },
+    {
+     "ok": true,
+     "msg": "زر «ابدأ التدريب» ظاهر في الصفحة الأولى"
+    },
+    {
+     "ok": true,
+     "msg": "لا أخطاء في الكونسول",
+     "errors": []
+    }
+   ],
+   "data": {
+    "a": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+    "t": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+    "h": "e7924e6ba8cd1174cc78d9a817bbc5321142869378ddd91640202786bbdc0bc9",
+    "th": "31b723dde04f514d1a88bcd1b54005980b21d7de3a272d3ff3d34744a7a07017",
+    "n": 10171615
+   }
+  },
+  {
+   "id": "E02-audioHash",
+   "name": "التحليل غير المطابق (audioHash) يُرفض ولا يبدأ التدريب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع يفشل",
+     "boot": {
+      "state": "error",
+      "phase": "verify",
+      "code": "audio-hash",
+      "message": "ملف التحليل لا يطابق ملف الصوت المرفق (بصمة SHA-256 مختلفة). أعد توليده بالأمر: python3 analysis/analyze_reference.py --force"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "رمز الرفض صحيح",
+     "got": "audio-hash"
+    },
+    {
+     "ok": true,
+     "msg": "لا زر ابدأ التدريب"
+    },
+    {
+     "ok": true,
+     "msg": "رسالة الخطأ تذكر أمر إعادة التوليد",
+     "text": "لن يبدأ التدريب: ملف التحليل لا يطابق ملف الصوت المرفق (بصمة SHA-256 مختلفة). أعد توليده بالأمر: python3 analysis/analyze_reference.py --force\nهذا يعني أن ملف التحليل وُلِّد لتسجيل/نص آخر. التقييم مع "
+    }
+   ],
+   "data": {}
+  },
+  {
+   "id": "E02-textHash",
+   "name": "التحليل غير المطابق (textHash) يُرفض ولا يبدأ التدريب",
+   "kind": "software-path-only",
+   "passed": true,
+   "seconds": 0.7,
+   "checks": [
+    {
+     "ok": true,
+     "msg": "الإقلاع يفشل",
+     "boot": {
+      "state": "error",
+      "phase": "verify",
+      "code": "text-hash",
+      "message": "ملف التحليل لا يطابق نص القصيدة الحالي. أعد توليده بالأمر: python3 analysis/analyze_reference.py --force"
+     }
+    },
+    {
+     "ok": true,
+     "msg": "رمز الرفض صحيح",
+     "got": "text-hash"
+    },
+    {
+     "ok": true,
+     "msg": "لا زر ابدأ التدريب"
+    },
+    {
+     "ok": true,
+     "msg": "رسالة الخطأ تذكر أمر إعادة التوليد",
+     "text": "لن يبدأ التدريب: ملف التحليل لا يطابق نص القصيدة الحالي. أعد توليده بالأمر: python3 analysis/analyze_reference.py --force\nهذا يعني أن ملف التحليل وُلِّد لتسجيل/نص آخر. التقييم مع تحليل غير مطابق سيكون"
+    }
+   ],
+   "data": {}
+  }
+ ]
+}
