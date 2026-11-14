@@ -1,0 +1,2526 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ميكسر كاريوكي الشعر العربي — نظام احترافي</title>
+<style>
+/* =====================================================================
+   PART 1 — CSS
+   نظام تصميم داكن احترافي يعتمد على ثلاثة ألوان دلالية:
+     - الذهبي  (--gold)    : النص/الملقي النشط
+     - الزمردي (--emerald) : حالة الميكروفون النشطة
+     - الرمادي (--muted)   : كل ما هو خامل أو منتهي
+   ===================================================================== */
+:root{
+  --bg-void:       #0a0b0f;
+  --bg-panel:      #13151b;
+  --bg-panel-alt:  #1a1d25;
+  --bg-nested:     #20232c;
+  --border-soft:   #2b2f3a;
+  --border-strong: #3a3f4d;
+
+  --gold:          #d4af37;
+  --gold-soft:     #f3e3a1;
+  --gold-glow:     rgba(212,175,55,.55);
+
+  --emerald:       #34d399;
+  --emerald-soft:  #a7f3d0;
+  --emerald-glow:  rgba(52,211,153,.55);
+
+  --muted:         #8a8f9c;
+  --muted-dim:     #565b68;
+
+  --danger:        #e2564f;
+  --ivory:         #f5f1e6;
+
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --font-display: "Amiri","Traditional Arabic","Noto Naskh Arabic",serif;
+  --font-ui:      "Tajawal","Segoe UI",sans-serif;
+  --font-mono:    "JetBrains Mono","Consolas",monospace;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0; padding:0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(212,175,55,.05), transparent 45%),
+    radial-gradient(circle at 80% 100%, rgba(52,211,153,.05), transparent 45%),
+    var(--bg-void);
+  color:var(--ivory);
+  font-family:var(--font-ui);
+  min-height:100vh;
+}
+
+/* ---------------------------------------------------------------------
+   الحاوية الرئيسية للتطبيق
+   --------------------------------------------------------------------- */
+.app-shell{
+  max-width:1180px;
+  margin:0 auto;
+  padding:30px 18px 90px;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.app-header{ text-align:center; }
+.app-header h1{
+  font-family:var(--font-display);
+  font-size:clamp(1.5rem,3.2vw,2.3rem);
+  margin:0 0 6px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-soft),var(--gold));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.app-header p{ margin:0; color:var(--muted); font-size:.88rem; }
+
+/* شريط حالة عام أعلى الصفحة */
+.status-strip{
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px;
+}
+.status-pill{
+  display:flex; align-items:center; gap:7px;
+  padding:5px 13px; border-radius:999px;
+  background:var(--bg-panel); border:1px solid var(--border-soft);
+  font-size:.76rem; color:var(--muted);
+}
+.status-dot{
+  width:7px; height:7px; border-radius:50%; background:var(--muted-dim);
+  transition:background .3s ease, box-shadow .3s ease;
+}
+.status-dot.on-gold{ background:var(--gold); box-shadow:0 0 8px var(--gold-glow); }
+.status-dot.on-emerald{ background:var(--emerald); box-shadow:0 0 8px var(--emerald-glow); }
+.status-dot.on-danger{ background:var(--danger); box-shadow:0 0 8px rgba(226,86,79,.5); }
+
+/* ---------------------------------------------------------------------
+   إدارة الحالات الثلاث (State Sections)
+   يتحكم بها JS عبر إضافة/إزالة class="visible" — يقابلها display none/block
+   --------------------------------------------------------------------- */
+.state-section{ display:none; }
+.state-section.visible{ display:block; }
+
+/* ===================== STATE 1 — رفع الملف ===================== */
+#state-upload .dropzone{
+  border:2px dashed var(--border-soft);
+  border-radius:var(--radius-xl);
+  background:var(--bg-panel);
+  padding:56px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .25s ease, background .25s ease, transform .15s ease;
+}
+#state-upload .dropzone:hover{ border-color:var(--gold); background:var(--bg-panel-alt); }
+#state-upload .dropzone.dragover{
+  border-color:var(--gold);
+  background:var(--bg-panel-alt);
+  transform:scale(1.01);
+}
+#state-upload .dropzone .icon{ font-size:2.6rem; margin-bottom:10px; }
+#state-upload .dropzone h3{ margin:0 0 6px; font-size:1.08rem; }
+#state-upload .dropzone p{ margin:0; color:var(--muted); font-size:.85rem; }
+#file-input{ display:none; }
+
+/* ===================== STATE 2 — لوحة التحكم ===================== */
+#state-controls{ display:none; flex-direction:column; gap:16px; }
+#state-controls.visible{ display:flex; }
+
+.control-card{
+  background:var(--bg-panel);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);
+  padding:18px 20px;
+}
+.control-card h4{
+  margin:0 0 12px;
+  font-size:.78rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  display:flex; align-items:center; gap:8px;
+}
+
+.transport-row{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.file-name{ flex:1 1 100%; color:var(--muted); font-size:.78rem; margin-bottom:2px; }
+
+button.ctrl-btn{
+  background:linear-gradient(160deg,#23262f,#191b21);
+  color:var(--ivory);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-md);
+  padding:10px 18px;
+  font-family:var(--font-ui);
+  font-size:.88rem;
+  cursor:pointer;
+  transition:transform .15s ease, border-color .2s ease;
+  white-space:nowrap;
+}
+button.ctrl-btn:hover{ border-color:var(--gold); }
+button.ctrl-btn:active{ transform:scale(.96); }
+button.ctrl-btn.gold{
+  background:linear-gradient(160deg,#e8c766,var(--gold));
+  color:#16130a; font-weight:700; border:none;
+}
+button.ctrl-btn.emerald{
+  background:linear-gradient(160deg,#6ee7b7,var(--emerald));
+  color:#052e21; font-weight:700; border:none;
+}
+button.ctrl-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+.progress-wrap{ flex:1 1 220px; display:flex; flex-direction:column; gap:6px; }
+.progress-track{
+  position:relative; width:100%; height:9px;
+  background:var(--bg-panel-alt); border-radius:999px;
+  overflow:hidden; cursor:pointer; border:1px solid var(--border-soft);
+}
+.progress-fill{
+  position:absolute; inset:0 auto 0 0; width:0%;
+  background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+  box-shadow:0 0 10px var(--gold-glow);
+}
+.progress-silence-marker{
+  position:absolute; top:0; bottom:0; width:2px;
+  background:var(--danger); opacity:.7;
+}
+.progress-times{ display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); }
+
+/* -- عناصر تحكم الميكسر: Gain sliders -- */
+.mixer-sliders{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.slider-group{ display:flex; flex-direction:column; gap:6px; }
+.slider-group label{
+  display:flex; justify-content:space-between;
+  font-size:.78rem; color:var(--muted);
+}
+.slider-group label .val{ font-family:var(--font-mono); color:var(--ivory); }
+.slider-group input[type="range"]{
+  -webkit-appearance:none;
+  width:100%; height:6px;
+  border-radius:999px;
+  background:var(--bg-nested);
+  outline:none;
+}
+.slider-group.gold input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--gold); box-shadow:0 0 8px var(--gold-glow); cursor:pointer;
+}
+.slider-group.emerald input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--emerald); box-shadow:0 0 8px var(--emerald-glow); cursor:pointer;
+}
+
+/* -- عناصر المعايرة (Calibration) -- */
+.calibration-row{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.calibration-row .cal-value{
+  font-family:var(--font-mono);
+  font-size:.85rem;
+  color:var(--gold);
+  min-width:90px;
+  text-align:center;
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm);
+  padding:6px 10px;
+}
+.cal-hint{ font-size:.72rem; color:var(--muted-dim); flex:1 1 100%; }
+
+/* ===================== STATE 3 — الميكسر / المربعات المتداخلة ===================== */
+#state-mixer{ display:none; flex-direction:column; gap:18px; }
+#state-mixer.visible{ display:flex; }
+
+/* المربع الأساسي الخارجي الذي يحتوي كل شيء */
+.mixer-outer-box{
+  background:var(--bg-panel);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-xl);
+  padding:20px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-areas:
+    "source mic"
+    "karaoke karaoke";
+  gap:18px;
+}
+@media (max-width:900px){
+  .mixer-outer-box{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "source"
+      "mic"
+      "karaoke";
+  }
+}
+
+/* -- مربع فرعي عام (Nested Box) -- */
+.nested-box{
+  background:var(--bg-panel-alt);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.nested-box-header{
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.78rem; color:var(--muted);
+}
+.nested-box-header .tag{ font-weight:700; letter-spacing:.03em; }
+.nested-box.source .tag{ color:var(--gold); }
+.nested-box.mic .tag{ color:var(--emerald); }
+
+/* مربع الملقي (المصدر) */
+.nested-box.source{ grid-area:source; }
+/* مربع الميكروفون */
+.nested-box.mic{ grid-area:mic; }
+/* مربع الكاريوكي */
+.nested-box.karaoke{ grid-area:karaoke; }
+
+/* حاوية الكانفاس داخل كل مربع */
+.canvas-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/7;
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-md);
+  overflow:hidden;
+}
+canvas{ display:block; width:100%; height:100%; }
+
+/* مقياس المستوى الصوتي (Level Meter) */
+.level-meter{
+  width:100%; height:8px;
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:999px;
+  overflow:hidden;
+}
+.level-meter-fill{
+  height:100%; width:0%;
+  transition:width .06s linear;
+}
+.nested-box.source .level-meter-fill{ background:linear-gradient(90deg,var(--gold),var(--gold-soft)); }
+.nested-box.mic .level-meter-fill{ background:linear-gradient(90deg,var(--emerald),var(--emerald-soft)); }
+
+/* شريط معلومات النبرة (Pitch) */
+.pitch-info{
+  display:flex; justify-content:space-between;
+  font-size:.74rem; color:var(--muted);
+  font-family:var(--font-mono);
+}
+.pitch-info .hz-value{ color:var(--ivory); }
+
+/* مؤشر تطابق النبرة بين الملقي والمستخدم */
+.pitch-match-gauge{
+  position:relative;
+  width:100%; height:10px;
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:999px;
+  overflow:hidden;
+}
+.pitch-match-needle{
+  position:absolute; top:0; bottom:0; width:3px;
+  left:50%;
+  background:var(--ivory);
+  transform:translateX(-50%);
+  transition:left .1s ease-out;
+}
+.pitch-match-center-line{
+  position:absolute; top:0; bottom:0; left:50%; width:1px;
+  background:var(--border-strong);
+}
+
+/* مؤشر حالة الميكروفون البصري الكبير */
+.mic-indicator{
+  display:flex; align-items:center; gap:8px;
+  font-size:.78rem; color:var(--muted);
+}
+.mic-indicator .pulse-dot{
+  width:12px; height:12px; border-radius:50%;
+  background:var(--muted-dim);
+  position:relative;
+}
+.mic-indicator.listening .pulse-dot{ background:var(--emerald); }
+.mic-indicator.listening .pulse-dot::after{
+  content:"";
+  position:absolute; inset:-6px;
+  border-radius:50%;
+  border:2px solid var(--emerald);
+  animation:pulse-ring 1.4s ease-out infinite;
+}
+@keyframes pulse-ring{
+  0%{ transform:scale(.6); opacity:.9; }
+  100%{ transform:scale(1.8); opacity:0; }
+}
+
+/* -- مربع الكاريوكي: البيت النشط + قائمة الأبيات -- */
+.active-verse-box{
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);
+  padding:30px 22px;
+  min-height:130px;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+}
+.active-verse-text{
+  font-family:var(--font-display);
+  font-size:clamp(1.3rem,3.6vw,2rem);
+  line-height:2;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .45s ease, transform .45s ease;
+}
+.active-verse-text.fade-in{ opacity:1; transform:translateY(0); }
+.active-verse-text.fade-out{ opacity:0; transform:translateY(-8px); }
+.active-verse-text .word{
+  color:var(--muted);
+  transition:color .2s ease, text-shadow .2s ease;
+  padding:0 2px;
+}
+.active-verse-text .word.filled{
+  color:var(--gold);
+  text-shadow:0 0 12px var(--gold-glow);
+}
+.active-verse-text .word.mic-boost{
+  color:var(--emerald);
+  text-shadow:0 0 12px var(--emerald-glow);
+}
+
+.verse-list-box{
+  margin-top:14px;
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);
+  padding:16px;
+  max-height:300px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+}
+.verse-list-box h5{
+  margin:0 0 10px; font-size:.76rem; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+.verse-row{
+  font-family:var(--font-display);
+  font-size:1.02rem;
+  padding:9px 13px;
+  border-radius:var(--radius-md);
+  margin-bottom:7px;
+  color:var(--muted);
+  background:var(--bg-panel-alt);
+  border:1px solid transparent;
+  transition:opacity .4s ease, max-height .4s ease, padding .4s ease,
+             margin .4s ease, border-color .3s ease, color .3s ease;
+  max-height:56px; overflow:hidden;
+}
+.verse-row.current{
+  color:var(--gold); border-color:var(--gold);
+  box-shadow:0 0 14px var(--gold-glow);
+}
+.verse-row.past{
+  opacity:0; max-height:0; padding:0 13px; margin-bottom:0; border-color:transparent;
+}
+.verse-list-box::-webkit-scrollbar{ width:6px; }
+.verse-list-box::-webkit-scrollbar-thumb{ background:var(--border-soft); border-radius:999px; }
+
+/* ---------------------------------------------------------------------
+   استجابة كاملة على الجوال
+   --------------------------------------------------------------------- */
+@media (max-width:640px){
+  .app-shell{ padding:20px 12px 70px; }
+  #state-upload .dropzone{ padding:36px 14px; }
+  .control-card{ padding:14px; }
+  .active-verse-box{ padding:22px 14px; min-height:100px; }
+  .mixer-sliders{ grid-template-columns:1fr; }
+}
+
+/* =========================================================================
+   PART 3 — إضافات جديدة (لا تُعدَّل الأنماط السابقة، هذا امتداد فقط)
+   =========================================================================
+   يحتوي هذا القسم على:
+     أ) صفحة المقدمة (Landing / Intro) بتدرّج لوني ديناميكي فاخر
+     ب) واجهة "المزامنة اليدوية" (Tap-Sync) لضبط توقيت الأبيات الحقيقية
+     ج) جدول تحرير توقيتات الأبيات + تصدير/استيراد JSON
+     د) عداد "التناغم" (Streak) وتأثيرات إتمام البيت
+     هـ) شريط بحث/قفز سريع بين الأبيات الـ 71
+   ========================================================================= */
+
+/* ----------------------------------------------------------------------
+   أ) صفحة المقدمة (Intro / Landing Page)
+   ---------------------------------------------------------------------- */
+#state-intro{
+  display:none;
+  min-height:78vh;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--radius-xl);
+  padding:64px 24px;
+  isolation:isolate;
+}
+#state-intro.visible{ display:flex; flex-direction:column; }
+
+/* الخلفية المتدرجة الديناميكية متعددة الألوان — تعكس فخامة القصيدة التاريخية */
+.intro-gradient-bg{
+  position:absolute; inset:0; z-index:-2;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(212,175,55,.35), transparent 55%),
+    radial-gradient(circle at 85% 15%, rgba(52,211,153,.22), transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(226,86,79,.18), transparent 55%),
+    linear-gradient(135deg,#0a0b0f 0%,#15131a 30%,#101820 60%,#0a0b0f 100%);
+  background-size:200% 200%;
+  animation:introGradientShift 16s ease-in-out infinite;
+}
+@keyframes introGradientShift{
+  0%{ background-position:0% 50%; }
+  50%{ background-position:100% 50%; }
+  100%{ background-position:0% 50%; }
+}
+/* طبقة "سيوف" زخرفية خفيفة متحركة في الخلفية لإيحاء بالحماسة التاريخية */
+.intro-sabers{
+  position:absolute; inset:0; z-index:-1; opacity:.06;
+  background-image:
+    repeating-linear-gradient(45deg, var(--gold) 0 2px, transparent 2px 140px),
+    repeating-linear-gradient(-45deg, var(--emerald) 0 2px, transparent 2px 160px);
+  animation:sabersDrift 40s linear infinite;
+}
+@keyframes sabersDrift{
+  0%{ transform:translate(0,0); }
+  100%{ transform:translate(140px,160px); }
+}
+
+.intro-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  align-self:center;
+  font-size:.78rem; letter-spacing:.12em; color:var(--gold-soft);
+  background:rgba(212,175,55,.1); border:1px solid rgba(212,175,55,.35);
+  padding:6px 16px; border-radius:999px; margin-bottom:22px;
+}
+
+.intro-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.1rem,5.5vw,3.6rem);
+  line-height:1.35;
+  margin:0 0 14px;
+  background:linear-gradient(90deg,var(--gold-soft),var(--gold),var(--emerald-soft),var(--gold));
+  background-size:300% auto;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation:introTitleShine 6s linear infinite;
+}
+@keyframes introTitleShine{
+  0%{ background-position:0% center; }
+  100%{ background-position:300% center; }
+}
+
+.intro-subtitle{
+  font-family:var(--font-display);
+  font-size:clamp(1rem,2.2vw,1.3rem);
+  color:var(--muted);
+  margin:0 auto 26px;
+  max-width:640px;
+  line-height:1.9;
+}
+
+.intro-meta-row{
+  display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+  margin-bottom:30px;
+}
+.intro-meta-chip{
+  font-size:.76rem; color:var(--ivory);
+  background:var(--bg-panel); border:1px solid var(--border-soft);
+  padding:7px 14px; border-radius:999px;
+  display:flex; align-items:center; gap:6px;
+}
+.intro-meta-chip .dot{ width:6px; height:6px; border-radius:50%; }
+.intro-meta-chip.gold-dot .dot{ background:var(--gold); }
+.intro-meta-chip.emerald-dot .dot{ background:var(--emerald); }
+
+.intro-context-card{
+  max-width:680px; margin:0 auto 34px;
+  background:rgba(19,21,27,.65);
+  backdrop-filter:blur(6px);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-lg);
+  padding:22px 26px;
+  text-align:right;
+  font-size:.9rem;
+  line-height:2.1;
+  color:var(--muted);
+}
+.intro-context-card strong{ color:var(--gold-soft); }
+
+.intro-cta-btn{
+  align-self:center;
+  border:none; cursor:pointer;
+  font-family:var(--font-ui); font-weight:700; font-size:1rem;
+  padding:16px 46px;
+  border-radius:999px;
+  color:#16130a;
+  background:linear-gradient(120deg,var(--gold-soft),var(--gold),var(--emerald));
+  background-size:220% auto;
+  box-shadow:0 8px 30px rgba(212,175,55,.35);
+  transition:transform .2s ease, background-position .4s ease, box-shadow .2s ease;
+}
+.intro-cta-btn:hover{
+  transform:translateY(-2px) scale(1.02);
+  background-position:100% center;
+  box-shadow:0 10px 36px rgba(52,211,153,.35);
+}
+.intro-cta-btn:active{ transform:translateY(0) scale(.98); }
+
+.intro-scroll-hint{
+  margin-top:26px; font-size:.72rem; color:var(--muted-dim);
+  display:flex; align-items:center; gap:6px; align-self:center;
+}
+
+@media (max-width:640px){
+  #state-intro{ padding:44px 16px; min-height:70vh; }
+  .intro-context-card{ padding:16px 18px; font-size:.84rem; }
+}
+
+/* ----------------------------------------------------------------------
+   ب) واجهة المزامنة اليدوية (Tap-Sync) — الحل العملي لتوقيت أي تسجيل حقيقي
+   ---------------------------------------------------------------------- */
+.tapsync-card{
+  background:linear-gradient(160deg,var(--bg-panel),var(--bg-panel-alt));
+  border:1px solid var(--gold-glow);
+  box-shadow:0 0 0 1px rgba(212,175,55,.06) inset;
+}
+.tapsync-row{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.tapsync-status{
+  flex:1 1 100%;
+  font-family:var(--font-display);
+  font-size:1.15rem;
+  padding:14px 18px;
+  border-radius:var(--radius-md);
+  background:var(--bg-nested);
+  border:1px solid var(--border-soft);
+  text-align:center;
+  color:var(--ivory);
+  min-height:52px;
+  display:flex; align-items:center; justify-content:center;
+}
+.tapsync-status.next-hint{ color:var(--muted); font-family:var(--font-ui); font-size:.85rem; }
+.tapsync-progress-label{
+  font-size:.74rem; color:var(--muted); font-family:var(--font-mono);
+}
+#btn-tap-sync-start.active{
+  background:linear-gradient(160deg,var(--emerald-soft),var(--emerald));
+  color:#052e21; border:none;
+}
+.tapsync-key-hint{
+  font-size:.72rem; color:var(--muted-dim);
+  border:1px solid var(--border-soft); border-radius:6px; padding:2px 8px;
+  font-family:var(--font-mono);
+}
+
+/* ----------------------------------------------------------------------
+   ج) جدول تحرير توقيتات الأبيات + تصدير/استيراد
+   ---------------------------------------------------------------------- */
+.timing-editor-wrap{
+  max-height:260px; overflow-y:auto;
+  border:1px solid var(--border-soft); border-radius:var(--radius-md);
+  background:var(--bg-nested);
+}
+.timing-editor-wrap::-webkit-scrollbar{ width:6px; }
+.timing-editor-wrap::-webkit-scrollbar-thumb{ background:var(--border-soft); border-radius:999px; }
+
+table.timing-table{ width:100%; border-collapse:collapse; font-size:.78rem; }
+table.timing-table th{
+  position:sticky; top:0; background:var(--bg-panel-alt);
+  color:var(--muted); text-align:right; padding:8px 10px;
+  font-weight:600; border-bottom:1px solid var(--border-soft);
+}
+table.timing-table td{
+  padding:6px 10px; border-bottom:1px solid var(--border-soft);
+  color:var(--ivory); vertical-align:middle;
+}
+table.timing-table tr:hover td{ background:rgba(212,175,55,.05); }
+table.timing-table tr.timing-row-active td{ background:rgba(212,175,55,.1); }
+.timing-table .verse-snippet{
+  font-family:var(--font-display); font-size:.92rem; color:var(--gold-soft);
+  max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.timing-table input[type="number"]{
+  width:74px; background:var(--bg-panel); border:1px solid var(--border-soft);
+  border-radius:6px; color:var(--ivory); font-family:var(--font-mono);
+  padding:4px 6px; font-size:.76rem;
+}
+.timing-table .jump-btn{
+  background:none; border:1px solid var(--border-soft); color:var(--muted);
+  border-radius:6px; padding:3px 8px; font-size:.72rem; cursor:pointer;
+}
+.timing-table .jump-btn:hover{ border-color:var(--gold); color:var(--gold-soft); }
+
+.io-buttons-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+
+/* ----------------------------------------------------------------------
+   د) عداد التناغم (Streak) وتأثيرات الإتمام
+   ---------------------------------------------------------------------- */
+.streak-badge{
+  position:absolute; top:10px; left:10px;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(52,211,153,.12); border:1px solid var(--emerald-glow);
+  color:var(--emerald-soft); font-family:var(--font-mono);
+  font-size:.74rem; padding:5px 11px; border-radius:999px;
+  opacity:0; transform:translateY(-6px);
+  transition:opacity .3s ease, transform .3s ease;
+  z-index:2;
+}
+.streak-badge.show{ opacity:1; transform:translateY(0); }
+.streak-badge .flame{ font-size:.9rem; }
+
+.verse-complete-burst{
+  position:absolute; inset:0; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  z-index:1;
+}
+.verse-complete-burst .ring{
+  position:absolute; width:40px; height:40px; border-radius:50%;
+  border:2px solid var(--gold-soft);
+  opacity:0;
+}
+.verse-complete-burst.fire .ring{
+  animation:burstRing .7s ease-out forwards;
+}
+@keyframes burstRing{
+  0%{ opacity:.9; transform:scale(.4); }
+  100%{ opacity:0; transform:scale(6.5); }
+}
+
+/* ----------------------------------------------------------------------
+   هـ) شريط البحث/القفز السريع بين الأبيات
+   ---------------------------------------------------------------------- */
+.verse-jump-row{
+  display:flex; align-items:center; gap:10px; margin-bottom:12px;
+}
+.verse-jump-row input[type="text"]{
+  flex:1;
+  background:var(--bg-panel); border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm); color:var(--ivory);
+  font-family:var(--font-display); font-size:.95rem;
+  padding:9px 14px;
+}
+.verse-jump-row input[type="text"]::placeholder{ color:var(--muted-dim); font-family:var(--font-ui); }
+.verse-jump-row .jump-count{ font-size:.72rem; color:var(--muted); white-space:nowrap; }
+
+/* =========================================================================
+   PART 4 — التفاعل الصوتي الحي (Audio-Reactive UI) — إضافة جديدة
+   =========================================================================
+   هذا القسم يربط توهّج/حجم الحاويات الرئيسية بالطاقة الصوتية الحقيقية للملقي،
+   محسوبة لحظيًا من AnalyserNode الخاص بمسار الملقي (لا بيانات وهمية).
+   ثلاث متغيرات CSS يُحدّثها JS كل إطار في renderLoop:
+     --reactive-glow   : الطاقة العامة (RMS الكلي) 0..1
+     --reactive-bass    : طاقة الترددات المنخفضة (الجهارة/النبر) 0..1
+     --reactive-treble  : طاقة الترددات العالية (وضوح الحروف الصفيرية) 0..1
+   ========================================================================= */
+#mixer-outer-box{
+  --reactive-glow: 0;
+  --reactive-bass: 0;
+  --reactive-treble: 0;
+  transition: box-shadow .09s linear, border-color .12s linear, transform .09s linear;
+  will-change: box-shadow, transform;
+  box-shadow:
+    0 0 calc(14px + 46px * var(--reactive-glow)) calc(-2px + 4px * var(--reactive-glow))
+      rgba(212,175,55, calc(0.16 + 0.5 * var(--reactive-glow))),
+    inset 0 0 calc(10px + 44px * var(--reactive-bass)) rgba(226,86,79, calc(var(--reactive-bass) * 0.30)),
+    0 0 calc(6px + 26px * var(--reactive-treble)) rgba(52,211,153, calc(var(--reactive-treble) * 0.25));
+  border-color: rgba(212,175,55, calc(0.18 + 0.6 * var(--reactive-glow)));
+  transform: scale(calc(1 + 0.007 * var(--reactive-glow)));
+}
+
+.active-verse-box{
+  --verse-glow: 0;
+  transition: box-shadow .11s linear;
+  box-shadow: inset 0 0 calc(10px + 34px * var(--verse-glow)) rgba(212,175,55, calc(0.14 + 0.46 * var(--verse-glow)));
+}
+
+/* -- تنويع دخول كل بيت بصريًا: 4 أنماط دخول تُختار دوريًا بحسب رقم البيت -- */
+@keyframes verseEnterRise{
+  0%{ opacity:0; transform:translateY(16px); }
+  100%{ opacity:1; transform:translateY(0); }
+}
+@keyframes verseEnterGlowPulse{
+  0%{ opacity:0; text-shadow:0 0 0 transparent; }
+  55%{ opacity:1; }
+  100%{ opacity:1; text-shadow:0 0 24px var(--gold-glow); }
+}
+@keyframes verseEnterScaleIn{
+  0%{ opacity:0; transform:scale(.9); }
+  100%{ opacity:1; transform:scale(1); }
+}
+@keyframes verseEnterSlideGlow{
+  0%{ opacity:0; transform:translateX(20px); filter:blur(3px); }
+  100%{ opacity:1; transform:translateX(0); filter:blur(0); }
+}
+.active-verse-text.enter-rise.fade-in{ animation:verseEnterRise .5s ease both; }
+.active-verse-text.enter-glow.fade-in{ animation:verseEnterGlowPulse .62s ease both; }
+.active-verse-text.enter-scale.fade-in{ animation:verseEnterScaleIn .46s cubic-bezier(.22,.9,.3,1.28) both; }
+.active-verse-text.enter-slide.fade-in{ animation:verseEnterSlideGlow .5s ease both; }
+
+/* -- نبضة بصرية صغيرة لكل كلمة لحظة امتلائها بلون الإلقاء أو المشاركة -- */
+@keyframes wordFillPop{
+  0%{ transform:scale(1.32); }
+  100%{ transform:scale(1); }
+}
+.active-verse-text .word{ display:inline-block; }
+.active-verse-text .word.filled,
+.active-verse-text .word.mic-boost{
+  animation:wordFillPop .22s ease-out;
+}
+
+/* -- تنفّس خفيف لصفحة المقدمة يزداد حيوية بعد رفع الملف (يُفعَّل عبر JS) -- */
+#state-intro.audio-armed .intro-gradient-bg{ animation-duration:9s; }
+#state-intro.audio-armed .intro-title{ animation-duration:3.5s; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="app-header">
+    <h1>ميكسر كاريوكي الشعر العربي</h1>
+    <p>السيف أصدق أنباءً من الكتب — أبو تمام</p>
+    <div class="status-strip">
+      <div class="status-pill"><span class="status-dot" id="dot-source"></span><span id="label-source">الملقي: لم يُحمَّل</span></div>
+      <div class="status-pill"><span class="status-dot" id="dot-mic"></span><span id="label-mic">الميكروفون: غير متصل</span></div>
+      <div class="status-pill"><span class="status-dot" id="dot-play"></span><span id="label-play">التشغيل: متوقف</span></div>
+    </div>
+  </header>
+
+  <!-- ===================== STATE 0 — صفحة المقدمة (Landing Page) =====================
+       تُعرض أولاً قبل أي شيء آخر؛ تعريف بالقصيدة وسياقها التاريخي، ثم دعوة للبدء. -->
+  <section id="state-intro" class="state-section visible">
+    <div class="intro-gradient-bg"></div>
+    <div class="intro-sabers"></div>
+
+    <span class="intro-eyebrow">✦ قصيدة عباسية خالدة — بحر البسيط ✦</span>
+
+    <h2 class="intro-title">السَّيْفُ أَصْدَقُ إِنْبَاءً مِنَ الكُتُبِ</h2>
+    <p class="intro-subtitle">تجربة كاريوكي أدبية تفاعلية لإحدى أعظم قصائد الفخر والحماسة
+      في الشعر العربي — أنشدها أبو تمام احتفاءً بفتح عمّورية.</p>
+
+    <div class="intro-meta-row">
+      <span class="intro-meta-chip gold-dot"><span class="dot"></span> الشاعر: أبو تمام حبيب بن أوس الطائي</span>
+      <span class="intro-meta-chip emerald-dot"><span class="dot"></span> البحر: البسيط</span>
+      <span class="intro-meta-chip gold-dot"><span class="dot"></span> عدد الأبيات: 71 بيتًا</span>
+      <span class="intro-meta-chip emerald-dot"><span class="dot"></span> العصر: العباسي (القرن 3 هـ)</span>
+    </div>
+
+    <div class="intro-context-card">
+      نظم أبو تمام هذه القصيدة تخليدًا لانتصار الخليفة المعتصم بالله في معركة
+      <strong>عمّورية</strong>، بعدما تجاهل تحذيرات المنجّمين الذين أشاروا عليه بتأجيل
+      الحملة، فجعل من بيته الافتتاحي الشهير — <strong>«السيف أصدق إنباءً من الكتب»</strong> —
+      إعلانًا خالدًا بأن الحسم في أرض الواقع لا في تكهنات الغيب. تمزج القصيدة بين الفخر
+      بالنصر، ووصف المعركة وصفًا بصريًا مبهرًا، ومديح القائد وحكمته وعزمه.
+    </div>
+
+    <button class="intro-cta-btn" id="btn-intro-start">ابدأ التجربة ↞</button>
+
+    <div class="intro-scroll-hint">ارفع تسجيل الإلقاء في الخطوة التالية لتبدأ المزامنة</div>
+  </section>
+
+  <!-- ===================== STATE 1 — رفع الملف الصوتي ===================== -->
+  <section id="state-upload" class="state-section">
+    <div class="dropzone" id="dropzone">
+      <div class="icon">🎙️</div>
+      <h3>ارفع ملف صوت الملقي (أسامة الواعظ)</h3>
+      <p>اضغط هنا أو اسحب ملف mp3 / wav لبدء الجلسة</p>
+      <input type="file" id="file-input" accept="audio/*">
+    </div>
+  </section>
+
+  <!-- ===================== STATE 2 — لوحة التحكم ===================== -->
+  <section id="state-controls" class="state-section">
+
+    <div class="control-card">
+      <h4>التشغيل</h4>
+      <div class="transport-row">
+        <div class="file-name" id="file-name-label">لم يتم اختيار ملف بعد</div>
+        <button class="ctrl-btn gold" id="btn-play">تشغيل</button>
+        <button class="ctrl-btn" id="btn-pause" disabled>إيقاف مؤقت</button>
+        <button class="ctrl-btn" id="btn-restart" disabled>إعادة من البداية</button>
+        <button class="ctrl-btn emerald" id="btn-mic">تفعيل الميكروفون</button>
+        <div class="progress-wrap">
+          <div class="progress-track" id="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+            <div class="progress-silence-marker" id="silence-marker" style="display:none;"></div>
+          </div>
+          <div class="progress-times">
+            <span id="time-current">00:00</span>
+            <span id="time-total">00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-card">
+      <h4>ميكسر الصوت (Gain / Balance)</h4>
+      <div class="mixer-sliders">
+        <div class="slider-group gold">
+          <label>مستوى صوت الملقي <span class="val" id="val-gain-source">100%</span></label>
+          <input type="range" id="slider-gain-source" min="0" max="150" value="100">
+        </div>
+        <div class="slider-group emerald">
+          <label>مستوى مراقبة الميكروفون (سماعات) <span class="val" id="val-gain-mic">0%</span></label>
+          <input type="range" id="slider-gain-mic" min="0" max="150" value="0">
+        </div>
+      </div>
+      <p class="cal-hint">تنبيه: رفع مستوى مراقبة الميكروفون فوق 0% قد يسبب صدى صوتي (Feedback) إن لم تستخدم سماعة رأس.</p>
+    </div>
+
+    <div class="control-card">
+      <h4>المعايرة (Timing Calibration)</h4>
+      <div class="calibration-row">
+        <button class="ctrl-btn" id="btn-auto-calibrate">معايرة تلقائية للميكروفون</button>
+        <label style="font-size:.8rem;color:var(--muted);">إزاحة يدوية:</label>
+        <input type="range" id="slider-manual-offset" min="-1000" max="1000" step="10" value="0" style="width:180px;">
+        <div class="cal-value" id="val-manual-offset">0 ms</div>
+        <span class="cal-hint" id="silence-info">جارٍ تحليل الصمت الافتتاحي...</span>
+      </div>
+    </div>
+
+    <!-- ============= إضافة جديدة: بطاقة المزامنة اليدوية (Tap-Sync) =============
+         الحل العملي لضبط توقيت أي تسجيل حقيقي دون معرفة مسبقة بأزمنته:
+         المستخدم يشغّل الصوت الفعلي وينقر (أو يضغط مسطرة المسافة) عند بداية
+         نطق كل بيت، فتُسجَّل اللحظة الحقيقية تلقائيًا لكل الأبيات الـ 71. -->
+    <div class="control-card tapsync-card">
+      <h4>🎯 المزامنة اليدوية الدقيقة (Tap-Sync) — موصى به لأي تسجيل جديد</h4>
+      <p class="cal-hint">شغّل الصوت، ثم اضغط الزر أو مفتاح المسافة (Space) بالضبط عند
+        بداية كل بيت يُنشِده الملقي. هذه أدق طريقة لضمان تطابق الكاريوكي مع أي تسجيل صوتي فعلي.</p>
+      <div class="tapsync-row">
+        <button class="ctrl-btn emerald" id="btn-tap-sync-start">بدء وضع المزامنة اليدوية</button>
+        <button class="ctrl-btn" id="btn-tap-sync-undo" disabled>تراجع عن آخر نقرة</button>
+        <button class="ctrl-btn" id="btn-tap-sync-finish" disabled>إنهاء وحفظ التوقيت</button>
+        <span class="tapsync-key-hint">Space = نقرة مزامنة</span>
+        <span class="tapsync-progress-label" id="tap-sync-progress">0 / 142 شطرًا مُزامنًا</span>
+      </div>
+      <div class="tapsync-row" style="margin-top:10px;">
+        <div class="tapsync-status" id="tapsync-current-label">اضغط "بدء وضع المزامنة اليدوية" لتبدأ</div>
+      </div>
+      <div class="tapsync-row" style="margin-top:4px;">
+        <div class="tapsync-status next-hint" id="tapsync-next-label">—</div>
+      </div>
+    </div>
+
+    <!-- ============= إضافة جديدة: جدول تحرير التوقيت + تصدير/استيراد ============= -->
+    <div class="control-card">
+      <h4>جدول توقيت الأبيات (قابل للتعديل يدويًا)</h4>
+      <p class="cal-hint">يمكنك ضبط بداية/نهاية أي شطر يدويًا بدقة الأجزاء من الثانية،
+        أو تصدير التوقيت الحالي كملف JSON لإعادة استخدامه لاحقًا مع نفس التسجيل الصوتي.</p>
+      <div class="timing-editor-wrap">
+        <table class="timing-table" id="timing-table">
+          <thead>
+            <tr>
+              <th>#</th><th>النص</th><th>البداية (ث)</th><th>النهاية (ث)</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="timing-table-body"></tbody>
+        </table>
+      </div>
+      <div class="io-buttons-row">
+        <button class="ctrl-btn gold" id="btn-export-timing">⬇ تصدير التوقيت (JSON)</button>
+        <button class="ctrl-btn" id="btn-import-timing-trigger">⬆ استيراد توقيت محفوظ</button>
+        <input type="file" id="import-timing-input" accept="application/json" style="display:none;">
+        <button class="ctrl-btn" id="btn-reset-timing">↺ إعادة التوزيع التلقائي</button>
+      </div>
+    </div>
+
+    <!-- ============= إضافة جديدة (وحدة مستقلة): توليد فيديو القصيدة =============
+         تعتمد على خادم poem_karaoke_module/server.py المحلي (Flask) ولا تلمس
+         أي منطق أصلي في الصفحة. تُستخدم اختياريًا فقط عند الحاجة لتصدير فيديو. -->
+    <div class="control-card" id="poem-video-card">
+      <h4>🎬 توليد فيديو القصيدة (موجة صوتية + صورة)</h4>
+      <p class="cal-hint">
+        يستخدم ملف الصوت المرفوع أعلاه تلقائيًا + صورة ثابتة تختارها هنا، وينتج فيديو
+        MP4 جاهز عبر خادم محلي صغير (poem_karaoke_module/server.py). شغّل الخادم أولاً
+        بأمر <code>python server.py</code> من مجلد الوحدة قبل الضغط على الزر.
+      </p>
+      <div class="tapsync-row">
+        <input type="file" id="poem-video-image-input" accept="image/*">
+        <button class="ctrl-btn gold" id="btn-generate-poem-video">توليد الفيديو</button>
+        <button class="ctrl-btn" id="btn-check-server-health">فحص اتصال الخادم</button>
+        <span class="tapsync-status" id="poem-video-status">لم يبدأ التوليد بعد</span>
+      </div>
+      <div class="tapsync-row" style="margin-top:10px;">
+        <video id="poem-video-preview" controls style="max-width:100%; display:none; border-radius:8px;"></video>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== STATE 3 — الميكسر بالمربعات المتداخلة ===================== -->
+  <section id="state-mixer" class="state-section">
+    <div class="mixer-outer-box" id="mixer-outer-box">
+
+      <!-- مربع الملقي (المصدر) -->
+      <div class="nested-box source">
+        <div class="nested-box-header">
+          <span class="tag">صوت الملقي (المصدر)</span>
+          <span>ذهبي</span>
+        </div>
+        <div class="canvas-wrap"><canvas id="canvas-source"></canvas></div>
+        <div class="level-meter"><div class="level-meter-fill" id="meter-source"></div></div>
+        <div class="pitch-info">
+          <span>التردد الأساسي</span>
+          <span class="hz-value" id="pitch-source-hz">-- Hz</span>
+        </div>
+      </div>
+
+      <!-- مربع الميكروفون -->
+      <div class="nested-box mic">
+        <div class="nested-box-header">
+          <span class="tag">صوتك (الميكروفون)</span>
+          <span>زمردي</span>
+        </div>
+        <div class="mic-indicator" id="mic-indicator">
+          <span class="pulse-dot"></span>
+          <span id="mic-indicator-label">غير مفعّل</span>
+        </div>
+        <div class="canvas-wrap"><canvas id="canvas-mic"></canvas></div>
+        <div class="level-meter"><div class="level-meter-fill" id="meter-mic"></div></div>
+        <div class="pitch-info">
+          <span>التردد الأساسي</span>
+          <span class="hz-value" id="pitch-mic-hz">-- Hz</span>
+        </div>
+        <div class="pitch-info">
+          <span>تطابق النبرة</span>
+          <span class="hz-value" id="pitch-match-label">--</span>
+        </div>
+        <div class="pitch-match-gauge">
+          <div class="pitch-match-center-line"></div>
+          <div class="pitch-match-needle" id="pitch-needle"></div>
+        </div>
+      </div>
+
+      <!-- مربع الكاريوكي -->
+      <div class="nested-box karaoke">
+        <div class="nested-box-header">
+          <span class="tag">الكاريوكي</span>
+          <span>تلوين لحظي</span>
+        </div>
+        <!-- إضافة جديدة: شريط بحث/قفز سريع بين الأبيات الـ71 -->
+        <div class="verse-jump-row">
+          <input type="text" id="verse-jump-input" placeholder="ابحث عن كلمة من أي بيت للقفز إليه مباشرة...">
+          <span class="jump-count" id="verse-jump-count">71 بيتًا</span>
+        </div>
+        <div class="active-verse-box" id="active-verse-box" style="position:relative;">
+          <!-- إضافة جديدة: شارة عداد التناغم (Streak) -->
+          <div class="streak-badge" id="streak-badge"><span class="flame">🔥</span><span id="streak-count-label">0</span></div>
+          <!-- إضافة جديدة: تأثير بصري عند إتمام بيت بمشاركة جيدة من المستخدم -->
+          <div class="verse-complete-burst" id="verse-complete-burst"><div class="ring"></div></div>
+          <div class="active-verse-text" id="active-verse-text"></div>
+        </div>
+        <div class="verse-list-box" id="verse-list-box">
+          <h5>الأبيات (71 بيتًا)</h5>
+          <div id="verse-list-inner"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <audio id="original-audio" preload="auto" crossorigin="anonymous"></audio>
+</div>
+
+<!-- الجزء الثاني (app.js) يحتوي كامل منطق البيانات والمحرك الصوتي -->
+<script>
+/* =========================================================================
+   PART 2 — app.js
+   نظام ميكسر كاريوكي الشعر العربي — المنطق البرمجي الكامل
+   =========================================================================
+   تنظيم الملف (Modular Sections):
+     1) طبقة البيانات (Data Layer)         — منفصلة تمامًا عن المنطق
+     2) مراجع DOM
+     3) حالة التطبيق العامة (App State)
+     4) إدارة الحالات الثلاث (State Machine)
+     5) القسم الأول: منطق رفع الملف + تحليل الصمت الافتتاحي
+     6) محرك Web Audio API (Source Graph + Mic Graph + Mixer)
+     7) كاشف النبرة (Pitch Detection Engine) — خوارزمية الارتباط الذاتي
+     8) نظام المعايرة (Manual + Auto Calibration)
+     9) محرك الكاريوكي (Color Filling + Auto-scroll)
+    10) حلقة الرسم الرئيسية (Render Loop)
+    11) ربط أحداث الواجهة (Event Wiring)
+   ========================================================================= */
+
+
+/* =========================================================================
+   1) طبقة البيانات (Data Layer)
+   مصفوفة الأبيات والتوقيتات — لا تحتوي على أي منطق عرض أو صوت.
+   لإضافة قصيدة جديدة أو تعديل الأزمنة، عدّل هذه المصفوفة فقط.
+   ========================================================================= */
+/* -------------------------------------------------------------------------
+   القصيدة كاملة (71 بيتًا / 142 شطرًا) — نص "السيف أصدق أنباء من الكتب"
+   لأبي تمام (188-231هـ)، قصيدة من التراث العربي الكلاسيكي (عمرها أكثر من
+   1100 عام). كل عنصر هنا شطرٌ واحد (نصف بيت)، بنفس اصطلاح الصف الأصلي.
+   ملاحظة مهمة: لم نتمكن من الاستماع إلى تسجيل يوتيوب المُرفق فعليًا (لا تتوفر
+   أداة تفريغ صوتي في هذه البيئة)، لذا فإن الأزمنة أدناه هي تقدير تناسبي
+   مبدئي فقط (يُعاد حسابه تلقائيًا بمجرد معرفة المدة الحقيقية للملف الذي
+   ترفعه). للحصول على مزامنة دقيقة 100% مع هذا التسجيل بالذات، استخدم
+   بطاقة "المزامنة اليدوية (Tap-Sync)" في لوحة التحكم.
+   ------------------------------------------------------------------------- */
+const POEM_LINES = [
+  "السَّيْفُ أَصْدَقُ إِنْبَاءً مِنَ الكُتُبِ", "فِي حَدِّهِ الْحَدُّ بَيْنَ الْجِدِّ وَاللَّعِبِ",
+  "بِيضُ الصَّفَائِحِ لَا سُودُ الصَّحَائِفِ فِي", "مُتُونِهِنَّ جَلَاءُ الشَّكِّ وَالرِّيَبِ",
+  "وَالْعِلْمُ فِي شُهُبِ الْأَرْمَاحِ لَامِعَةً", "بَيْنَ الْخَمِيسَيْنِ لَا فِي السَّبْعَةِ الشُّهُبِ",
+  "أَيْنَ الرِّوَايَةُ بَلْ أَيْنَ النُّجُومُ وَمَا", "صَاغُوهُ مِنْ زُخْرُفٍ فِيهَا وَمِنْ كَذِبِ",
+  "تَخَرُّصاً وَأَحَادِيثاً مُلَفَّقَةً", "لَيْسَتْ بِنَبْعٍ إِذَا عُدَّتْ وَلَا غَرَبِ",
+  "عَجَائِباً زَعَمُوا الْأَيَّامَ مُجْفِلَةً", "عَنْهُنَّ فِي صَفَرِ الْأَصْفَارِ أَوْ رَجَبِ",
+  "وَخَوَّفُوا النَّاسَ مِنْ دَهْيَاءَ مُظْلِمَةٍ", "إِذَا بَدَا الْكَوْكَبُ الْغَرْبِيُّ ذُو الذَّنَبِ",
+  "وَصَيَّرُوا الْأَبْرُجَ الْعُلْيَا مُرَتَّبَةً", "مَا كَانَ مُنْقَلِباً أَوْ غَيْرَ مُنْقَلِبِ",
+  "يَقْضُونَ بِالْأَمْرِ عَنْهَا وَهْيَ غَافِلَةٌ", "مَا دَارَ فِي فُلُكٍ مِنْهَا وَفِي قُطُبِ",
+  "لَوْ بَيَّنَتْ قَطُّ أَمْراً قَبْلَ مَوْقِعِهِ", "لَمْ تُخْفِ مَا حَلَّ بِالْأَوْثَانِ وَالصُّلُبِ",
+  "فَتْحُ الْفُتُوحِ تَعَالَى أَنْ يُحِيطَ بِهِ", "نَظْمٌ مِنَ الشِّعْرِ أَوْ نَثْرٌ مِنَ الْخُطَبِ",
+  "فَتْحٌ تَفَتَّحُ أَبْوَابُ السَّمَاءِ لَهُ", "وَتَبْرُزُ الْأَرْضُ فِي أَثْوَابِهَا الْقُشُبِ",
+  "يَا يَوْمَ وَقْعَةِ عَمُّورِيَّةَ انْصَرَفَتْ", "مِنْكَ الْمُنَى حُفَّلاً مَعْسُولَةَ الْحَلَبِ",
+  "أَبْقَيْتَ جَدَّ بَنِي الْإِسْلَامِ فِي صَعَدٍ", "وَالْمُشْرِكِينَ وَدَارَ الشِّرْكِ فِي صَبَبِ",
+  "أُمٌّ لَهُمْ لَوْ رَجَوْا أَنْ تُفْتَدَى جَعَلُوا", "فِدَاءَهَا كُلَّ أُمٍّ مِنْهُمُ وَأَبِ",
+  "وَبَرْزَةِ الْوَجْهِ قَدْ أَعْيَتْ رِيَاضَتُهَا", "كِسْرَى وَصَدَّتْ صُدُوداً عَنْ أَبِي كَرِبِ",
+  "بِكْرٌ فَمَا افْتَرَعَتْهَا كَفُّ حَادِثَةٍ", "وَلَا تَرَقَّتْ إِلَيْهَا هِمَّةُ النُّوَبِ",
+  "مِنْ عَهْدِ إِسْكَنْدَرٍ أَوْ قَبْلَ ذَلِكَ قَدْ", "شَابَتْ نَوَاصِي اللَّيَالِي وَهْيَ لَمْ تَشِبِ",
+  "حَتَّى إِذَا مَخَضَ اللَهُ السِّنِينَ لَهَا", "مَخْضَ الْبَخِيلَةِ كَانَتْ زُبْدَةَ الْحِقَبِ",
+  "أَتَتْهُمُ الْكُرْبَةُ السَّوْدَاءُ سَادِرَةً", "مِنْهَا وَكَانَ اسْمُهَا فَرَّاجَةَ الْكُرَبِ",
+  "جَرَى لَهَا الْفَأْلُ بَرْحاً يَوْمَ أَنْقَرَةٍ", "إِذْ غُودِرَتْ وَحْشَةَ السَّاحَاتِ وَالرُّحَبِ",
+  "لَمَّا رَأَتْ أُخْتَهَا بِالْأَمْسِ قَدْ خَرِبَتْ", "كَانَ الْخَرَابُ لَهَا أَعْدَى مِنَ الْجَرَبِ",
+  "كَمْ بَيْنَ حِيطَانِهَا مِنْ فَارِسٍ بَطَلٍ", "قَانِي الذَّوَائِبِ مِنْ آنِي دَمٍ سَرِبِ",
+  "بِسُنَّةِ السَّيْفِ وَالْخَطِّيِّ مِنْ دَمِهِ", "لَا سُنَّةِ الدِّينِ وَالْإِسْلَامِ مُخْتَضِبِ",
+  "لَقَدْ تَرَكْتَ أَمِيرَ الْمُؤْمِنِينَ بِهَا", "لِلنَّارِ يَوْماً ذَلِيلَ الصَّخْرِ وَالْخَشَبِ",
+  "غَادَرْتَ فِيهَا بَهِيمَ اللَّيْلِ وَهْوَ ضُحًى", "يَشُلُّهُ وَسْطَهَا صُبْحٌ مِنَ اللَّهَبِ",
+  "حَتَّى كَأَنَّ جَلَابِيبَ الدُّجَى رَغِبَتْ", "عَنْ لَوْنِهَا وَكَأَنَّ الشَّمْسَ لَمْ تَغِبِ",
+  "ضَوْءٌ مِنَ النَّارِ وَالظَّلْمَاءُ عَاكِفَةٌ", "وَظُلْمَةٌ مِنْ دُخَانٍ فِي ضُحًى شَحِبِ",
+  "فَالشَّمْسُ طَالِعَةٌ مِنْ ذَا وَقَدْ أَفَلَتْ", "وَالشَّمْسُ وَاجِبَةٌ مِنْ ذَا وَلَمْ تَجِبِ",
+  "تَصَرَّحَ الدَّهْرُ تَصْرِيحَ الْغَمَامِ لَهَا", "عَنْ يَوْمِ هَيْجَاءَ مِنْهَا طَاهِرٍ جُنُبِ",
+  "لَمْ تَطْلُعِ الشَّمْسُ فِيهِ يَوْمَ ذَاكَ عَلَى", "بَانٍ بِأَهْلٍ وَلَمْ تَغْرُبْ عَلَى عَزَبِ",
+  "مَا رَبْعُ مَيَّةَ مَعْمُوراً يُطِيفُ بِهِ", "غَيْلَانُ أَبْهَى رُبًى مِنْ رَبْعِهَا الْخَرِبِ",
+  "وَلَا الْخُدُودُ وَقَدْ أُدْمِينَ مِنْ خَجَلٍ", "أَشْهَى إِلَى نَاظِرِي مِنْ خَدِّهَا التَّرِبِ",
+  "سَمَاجَةً غَنِيَتْ مِنَّا الْعُيُونُ بِهَا", "عَنْ كُلِّ حُسْنٍ بَدَا أَوْ مَنْظَرٍ عَجَبِ",
+  "وَحُسْنُ مُنْقَلَبٍ تَبْقَى عَوَاقِبُهُ", "جَاءَتْ بَشَاشَتُهُ مِنْ سُوءِ مُنْقَلَبِ",
+  "لَوْ يَعْلَمُ الْكُفْرُ كَمْ مِنْ أَعْصُرٍ كَمَنَتْ", "لَهُ الْعَوَاقِبُ بَيْنَ السُّمْرِ وَالْقُضُبِ",
+  "تَدْبِيرُ مُعْتَصِمٍ بِاللَهِ مُنْتَقِمٍ", "لِلَّهِ مُرْتَقِبٍ فِي اللَهِ مُرْتَغِبِ",
+  "وَمُطْعِمِ النَّصْرِ لَمْ تَكْهَمْ أَسِنَّتُهُ", "يَوْماً وَلَا حُجِبَتْ عَنْ رَوْحِ مُحْتَجِبِ",
+  "لَمْ يَغْزُ قَوْماً وَلَمْ يَنْهَضْ إِلَى بَلَدٍ", "إِلَّا تَقَدَّمَهُ جَيْشٌ مِنَ الرَّعَبِ",
+  "لَوْ لَمْ يَقُدْ جَحْفَلاً يَوْمَ الْوَغَى لَغَدَا", "مِنْ نَفْسِهِ وَحْدَهَا فِي جَحْفَلٍ لَجِبِ",
+  "رَمَى بِكَ اللَهُ بُرْجَيْهَا فَهَدَّمَهَا", "وَلَوْ رَمَى بِكَ غَيْرُ اللَهِ لَمْ يُصِبِ",
+  "مِنْ بَعْدِ مَا أَشَّبُوهَا وَاثِقِينَ بِهَا", "وَاللَهُ مِفْتَاحُ بَابِ الْمَعْقِلِ الْأَشِبِ",
+  "وَقَالَ ذُو أَمْرِهِمْ لَا مَرْتَعٌ صَدَدٌ", "لِلسَّارِحِينَ وَلَيْسَ الْوِرْدُ مِنْ كَثَبِ",
+  "أَمَانِياً سَلَبَتْهُمْ نُجْحَ هَاجِسِهَا", "ظُبَى السُّيُوفِ وَأَطْرَافُ الْقَنَا السُّلُبِ",
+  "إِنَّ الْحِمَامَيْنِ مِنْ بِيضٍ وَمِنْ سُمُرٍ", "دَلَوْا الْحَيَاتَيْنِ مِنْ مَاءٍ وَمِنْ عُشُبِ",
+  "لَبَّيْتَ صَوْتاً زِبَطْرِيّاً هَرَقْتَ لَهُ", "كَأْسَ الْكَرَى وَرُضَابَ الْخُرَّدِ الْعُرُبِ",
+  "عَدَاكَ حَرُّ الثُّغُورِ الْمُسْتَضَامَةِ عَنْ", "بَرْدِ الثُّغُورِ وَعَنْ سَلْسَالِهَا الْحَصِبِ",
+  "أَجَبْتَهُ مُعْلِناً بِالسَّيْفِ مُنْصَلِتاً", "وَلَوْ أَجَبْتَ بِغَيْرِ السَّيْفِ لَمْ تُجِبِ",
+  "حَتَّى تَرَكْتَ عَمُودَ الشِّرْكِ مُنْعَفِراً", "وَلَمْ تُعَرِّجْ عَلَى الْأَوْتَادِ وَالطُّنُبِ",
+  "لَمَّا رَأَى الْحَرْبَ رَأْيَ الْعَيْنِ تُوفِلِسٌ", "وَالْحَرْبُ مُشْتَقَّةُ الْمَعْنَى مِنَ الْحَرَبِ",
+  "غَدَا يُصَرِّفُ بِالْأَمْوَالِ جِرْيَتَهَا", "فَعَزَّهُ الْبَحْرُ ذُو التَّيَّارِ وَالْحَدَبِ",
+  "هَيْهَاتَ زُعْزِعَتِ الْأَرْضُ الْوَقُورُ بِهِ", "عَنْ غَزْوِ مُحْتَسِبٍ لَا غَزْوِ مُكْتَسِبِ",
+  "لَمْ يُنْفِقِ الذَّهَبَ الْمُرْبِي بِكَثْرَتِهِ", "عَلَى الْحَصَى وَبِهِ فَقْرٌ إِلَى الذَّهَبِ",
+  "إِنَّ الْأُسُودَ أُسُودَ الْغِيلِ هِمَّتُهَا", "يَوْمَ الْكَرِيهَةِ فِي الْمَسْلُوبِ لَا السَّلَبِ",
+  "وَلَّى وَقَدْ أَلْجَمَ الْخَطِّيُّ مَنْطِقَهُ", "بِسَكْتَةٍ تَحْتَهَا الْأَحْشَاءُ فِي صَخَبِ",
+  "أَحْذَى قَرَابِينُهُ صَرْفَ الرَّدَى وَمَضَى", "يَحْتَثُّ أَنْجَى مَطَايَاهُ مِنَ الْهَرَبِ",
+  "مُوَكِّلاً بِيَفَاعِ الْأَرْضِ يُشْرِفُهُ", "مِنْ خِفَّةِ الْخَوْفِ لَا مِنْ خِفَّةِ الطَّرَبِ",
+  "إِنْ يَعْدُ مِنْ حَرِّهَا عَدْوَ الظَّلِيمِ فَقَدْ", "أَوْسَعْتَ جَاحِمَهَا مِنْ كَثْرَةِ الْحَطَبِ",
+  "تِسْعُونَ أَلْفاً كَآسَادِ الشَّرَى نَضِجَتْ", "جُلُودُهُمْ قَبْلَ نُضْجِ التِّينِ وَالْعِنَبِ",
+  "يَا رُبَّ حَوْبَاءَ حِينَ اجْتُثَّ دَابِرُهُمْ", "طَابَتْ وَلَوْ ضُمِّخَتْ بِالْمِسْكِ لَمْ تَطِبِ",
+  "وَمُغْضَبٍ رَجَعَتْ بِيضُ السُّيُوفِ بِهِ", "حَيَّ الرِّضَا مِنْ رَدَاهُمْ مَيِّتَ الْغَضَبِ",
+  "وَالْحَرْبُ قَائِمَةٌ فِي مَأْزِقٍ لَجِجٍ", "تَجْثُو الْقِيَامُ بِهِ صُغْراً عَلَى الرُّكَبِ",
+  "كَمْ نِيلَ تَحْتَ سَنَاهَا مِنْ سَنَا قَمَرٍ", "وَتَحْتَ عَارِضِهَا مِنْ عَارِضٍ شَنِبِ",
+  "كَمْ كَانَ فِي قَطْعِ أَسْبَابِ الرِّقَابِ بِهَا", "إِلَى الْمُخَدَّرَةِ الْعَذْرَاءِ مِنْ سَبَبِ",
+  "كَمْ أَحْرَزَتْ قُضُبُ الْهِنْدِيِّ مُصْلَتَةً", "تَهْتَزُّ مِنْ قُضُبٍ تَهْتَزُّ فِي كُثُبِ",
+  "بِيضٌ إِذَا انْتُضِيَتْ مِنْ حُجْبِهَا رَجَعَتْ", "أَحَقَّ بِالْبِيضِ أَتْرَاباً مِنَ الْحُجُبِ",
+  "خَلِيفَةَ اللَهِ جَازَى اللَهُ سَعْيَكَ عَنْ", "جُرْثُومَةِ الدِّينِ وَالْإِسْلَامِ وَالْحَسَبِ",
+  "بَصُرْتَ بِالرَّاحَةِ الْكُبْرَى فَلَمْ تَرَهَا", "تُنَالُ إِلَّا عَلَى جِسْرٍ مِنَ التَّعَبِ",
+  "إِنْ كَانَ بَيْنَ صُرُوفِ الدَّهْرِ مِنْ رَحِمٍ", "مَوْصُولَةٍ أَوْ ذِمَامٍ غَيْرِ مُنْقَضِبِ",
+  "فَبَيْنَ أَيَّامِكَ اللَّاتِي نُصِرْتَ بِهَا", "وَبَيْنَ أَيَّامِ بَدْرٍ أَقْرَبُ النَّسَبِ",
+  "أَبْقَتْ بَنِي الْأَصْفَرِ الْمِمْرَاضِ كَاسْمِهِمُ", "صُفْرَ الْوُجُوهِ وَجَلَّتْ أَوْجُهَ الْعَرَبِ"
+];
+
+/* بناء مصفوفة الأبيات (VERSES_DATA) من نص القصيدة، بأزمنة افتراضية تناسبية
+   حسب طول كل شطر نصًا (تقريب معقول لمدة النطق)، ثم تُعاد معايرتها تلقائيًا
+   بمجرد معرفة المدة الحقيقية لملف الصوت المرفوع (انظر recalcVerseTimings). */
+function buildVersesFromPoemLines(lines, totalDurationSec){
+  const weights = lines.map(line => Math.max(3, line.replace(/\s/g, '').length));
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+
+  let cursor = 0;
+  return lines.map((text, i) => {
+    const share = (weights[i] / totalWeight) * totalDurationSec;
+    const start = cursor;
+    const end = cursor + share;
+    cursor = end;
+    return { index: i, text, start, end };
+  });
+}
+
+// مدة افتراضية أولية (بالثواني) تُستخدم فقط حتى تحميل الملف الصوتي الفعلي
+const DEFAULT_PLACEHOLDER_DURATION_SEC = 480;
+
+let VERSES_DATA = buildVersesFromPoemLines(POEM_LINES, DEFAULT_PLACEHOLDER_DURATION_SEC);
+
+/* إعادة حساب أزمنة كل الأبيات تناسبيًا فور معرفة المدة الحقيقية للملف،
+   مع الحفاظ على أي تعديل يدوي أجراه المستخدم عبر جدول التوقيت أو Tap-Sync
+   (لا نُعيد الحساب إن كان المستخدم قد ضبط التوقيت يدويًا بالفعل). */
+function recalcVerseTimingsFromRealDuration(realDurationSec){
+  if (appState.timingWasManuallyEdited) return;
+  if (!realDurationSec || !isFinite(realDurationSec) || realDurationSec <= 0) return;
+
+  const usableDuration = Math.max(1, realDurationSec - appState.silenceOffsetSec);
+  const rebuilt = buildVersesFromPoemLines(POEM_LINES, usableDuration);
+  rebuilt.forEach((v, i) => { VERSES_DATA[i].start = v.start; VERSES_DATA[i].end = v.end; });
+  renderTimingTable();
+}
+
+/* إعدادات عامة قابلة للتوسعة، منفصلة عن منطق التنفيذ */
+const CONFIG = {
+  FFT_SIZE: 2048,               // دقة تحليل Web Audio API (زوجية القوة)
+  SMOOTHING: 0.75,              // معامل تنعيم الطيف الترددي
+  SILENCE_AMPLITUDE_THRESHOLD: 0.015, // عتبة اعتبار المقطع "صامتًا"
+  SILENCE_SCAN_STEP_SEC: 0.02,  // دقة مسح الصمت الافتتاحي بالثواني
+  PITCH_MIN_HZ: 60,             // أدنى تردد بشري متوقع (نطاق الإلقاء)
+  PITCH_MAX_HZ: 500,            // أعلى تردد بشري متوقع
+  CALIBRATION_TEST_WINDOW_MS: 6000, // مدة نافذة المعايرة التلقائية
+};
+
+
+/* =========================================================================
+   2) مراجع DOM
+   ========================================================================= */
+const dropzone         = document.getElementById('dropzone');
+const fileInput        = document.getElementById('file-input');
+const fileNameLabel    = document.getElementById('file-name-label');
+
+const stateUpload      = document.getElementById('state-upload');
+const stateControls    = document.getElementById('state-controls');
+const stateMixer        = document.getElementById('state-mixer');
+
+const audioEl          = document.getElementById('original-audio');
+
+const btnPlay           = document.getElementById('btn-play');
+const btnPause          = document.getElementById('btn-pause');
+const btnRestart        = document.getElementById('btn-restart');
+const btnMic             = document.getElementById('btn-mic');
+const btnAutoCalibrate   = document.getElementById('btn-auto-calibrate');
+
+const progressTrack     = document.getElementById('progress-track');
+const progressFill      = document.getElementById('progress-fill');
+const silenceMarker      = document.getElementById('silence-marker');
+const timeCurrentEl      = document.getElementById('time-current');
+const timeTotalEl        = document.getElementById('time-total');
+
+const sliderGainSource   = document.getElementById('slider-gain-source');
+const sliderGainMic      = document.getElementById('slider-gain-mic');
+const valGainSource       = document.getElementById('val-gain-source');
+const valGainMic          = document.getElementById('val-gain-mic');
+
+const sliderManualOffset = document.getElementById('slider-manual-offset');
+const valManualOffset    = document.getElementById('val-manual-offset');
+const silenceInfoLabel    = document.getElementById('silence-info');
+
+const dotSource = document.getElementById('dot-source');
+const dotMic     = document.getElementById('dot-mic');
+const dotPlay    = document.getElementById('dot-play');
+const labelSource = document.getElementById('label-source');
+const labelMic     = document.getElementById('label-mic');
+const labelPlay    = document.getElementById('label-play');
+
+const canvasSource = document.getElementById('canvas-source');
+const canvasMic    = document.getElementById('canvas-mic');
+const ctxSource    = canvasSource.getContext('2d');
+const ctxMic       = canvasMic.getContext('2d');
+
+const meterSource   = document.getElementById('meter-source');
+const meterMic      = document.getElementById('meter-mic');
+
+const pitchSourceHzEl = document.getElementById('pitch-source-hz');
+const pitchMicHzEl    = document.getElementById('pitch-mic-hz');
+const pitchMatchLabel  = document.getElementById('pitch-match-label');
+const pitchNeedle       = document.getElementById('pitch-needle');
+
+const micIndicator      = document.getElementById('mic-indicator');
+const micIndicatorLabel = document.getElementById('mic-indicator-label');
+
+const activeVerseText  = document.getElementById('active-verse-text');
+const verseListInner    = document.getElementById('verse-list-inner');
+
+/* ---- مراجع DOM الخاصة بالتفاعل الصوتي الحي (Audio-Reactive UI) ---- */
+const mixerOuterBox    = document.getElementById('mixer-outer-box');
+const activeVerseBoxEl  = document.getElementById('active-verse-box');
+
+/* ---- مراجع DOM الجديدة ---- */
+const stateIntro         = document.getElementById('state-intro');
+const btnIntroStart      = document.getElementById('btn-intro-start');
+
+const btnTapSyncStart    = document.getElementById('btn-tap-sync-start');
+const btnTapSyncUndo     = document.getElementById('btn-tap-sync-undo');
+const btnTapSyncFinish   = document.getElementById('btn-tap-sync-finish');
+const tapSyncProgressEl  = document.getElementById('tap-sync-progress');
+const tapSyncCurrentLbl  = document.getElementById('tapsync-current-label');
+const tapSyncNextLbl     = document.getElementById('tapsync-next-label');
+
+const timingTableBody    = document.getElementById('timing-table-body');
+const btnExportTiming    = document.getElementById('btn-export-timing');
+const btnImportTrigger   = document.getElementById('btn-import-timing-trigger');
+const importTimingInput  = document.getElementById('import-timing-input');
+const btnResetTiming     = document.getElementById('btn-reset-timing');
+
+const streakBadge        = document.getElementById('streak-badge');
+const streakCountLabel   = document.getElementById('streak-count-label');
+const verseCompleteBurst = document.getElementById('verse-complete-burst');
+
+const verseJumpInput     = document.getElementById('verse-jump-input');
+const verseJumpCount     = document.getElementById('verse-jump-count');
+
+
+/* =========================================================================
+   3) حالة التطبيق العامة (App State)
+   ========================================================================= */
+const appState = {
+  currentAppMode: 'intro',   // intro | upload | controls | mixer
+  isMixerVisible: false,
+  currentVerseIndex: -1,
+  verseRowElements: [],
+
+  // زمن الصمت الافتتاحي المكتشف تلقائيًا (بالثواني)
+  silenceOffsetSec: 0,
+
+  // إزاحة المعايرة اليدوية للميكروفون (بالميلي ثانية) — موجبة = تأخير الميكروفون
+  manualCalibrationOffsetMs: 0,
+
+  // نتيجة آخر معايرة تلقائية
+  autoCalibrationOffsetMs: 0,
+
+  isMicReady: false,
+  isCalibrating: false,
+
+  /* ---- إضافات جديدة ---- */
+  timingWasManuallyEdited: false,   // يمنع الكتابة فوق تعديلات المستخدم اليدوية للتوقيت
+  isTapSyncActive: false,           // هل وضع "المزامنة اليدوية" مفعّل الآن؟
+  tapSyncNextIndex: 0,              // فهرس الشطر التالي المطلوب مزامنته
+  tapSyncTimestamps: [],            // الأزمنة الحقيقية المسجَّلة أثناء المزامنة اليدوية
+
+  consecutiveGoodFrames: 0,         // عدّاد الإطارات المتتالية ذات تطابق نبرة جيد (للـ Streak)
+  currentStreakCount: 0,            // أعلى Streak ظاهر حاليًا للمستخدم
+  lastBurstVerseIndex: -1,          // آخر بيت شغّل تأثير "الإتمام" البصري (لمنع التكرار)
+
+  verseFilterQuery: '',             // نص بحث/تصفية شريط القفز السريع بين الأبيات
+
+  /* ---- حالة التفاعل الصوتي الحي (Audio-Reactive UI) — إضافة جديدة ----
+     قيم منعّمة (Smoothed) بين 0 و1 تُشتق من الطيف الترددي الحقيقي لصوت
+     الملقي، وتُطبَّق كمتغيرات CSS على الحاويات لحظة بلحظة. */
+  reactiveGlow: 0,     // الطاقة العامة (كل الترددات)
+  reactiveBass: 0,     // طاقة الترددات المنخفضة (~60-250Hz): جهارة ونبر الإلقاء
+  reactiveMid: 0,      // طاقة الترددات المتوسطة (~250-2000Hz): وضوح الكلام
+  reactiveTreble: 0,   // طاقة الترددات العالية (~2000-6000Hz): وضوح الحروف الصفيرية
+  verseEnterVariants: ['enter-rise', 'enter-glow', 'enter-scale', 'enter-slide'], // أنماط دخول الأبيات الأربعة
+};
+
+/* حالة محرك Web Audio API */
+const audioEngine = {
+  audioContext: null,
+  sourceNode: null,          // MediaElementAudioSourceNode لصوت الملقي
+  sourceGainNode: null,      // عقدة تحكم بمستوى صوت الملقي
+  sourceAnalyser: null,      // AnalyserNode لصوت الملقي
+
+  micStream: null,
+  micSourceNode: null,       // MediaStreamAudioSourceNode للميكروفون
+  micGainNode: null,         // عقدة تحكم بمستوى مراقبة الميكروفون في السماعات
+  micAnalyser: null,         // AnalyserNode لصوت المستخدم
+
+  sourceFreqData: null,
+  sourceTimeData: null,
+  micFreqData: null,
+  micTimeData: null,
+};
+
+
+/* =========================================================================
+   4) إدارة الحالات الثلاث (State Machine)
+   دالة مركزية وحيدة تتحكم في display:none/block عبر class "visible"
+   ========================================================================= */
+function setAppMode(modeName){
+  appState.currentAppMode = modeName;
+
+  stateIntro.classList.toggle('visible', modeName === 'intro');
+  stateUpload.classList.toggle('visible', modeName === 'upload');
+  stateControls.classList.toggle('visible', modeName === 'controls' || modeName === 'mixer');
+  stateMixer.classList.toggle('visible', modeName === 'mixer');
+
+  appState.isMixerVisible = (modeName === 'mixer');
+}
+
+/* إضافة جديدة: الانتقال من صفحة المقدمة إلى صفحة رفع الملف */
+btnIntroStart.addEventListener('click', () => setAppMode('upload'));
+
+
+/* =========================================================================
+   5) القسم الأول: رفع الملف + تحليل الصمت الافتتاحي
+   ========================================================================= */
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFileSelected(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) handleFileSelected(e.target.files[0]);
+});
+
+async function handleFileSelected(file){
+  if (!file.type.startsWith('audio/')){
+    alert('الرجاء اختيار ملف صوتي صالح (mp3 أو wav).');
+    return;
+  }
+
+  // === إضافة وحدة توليد فيديو القصيدة (لا تغيّر أي منطق أصلي) ===
+  // نحفظ نسخة من ملف الصوت المرفوع في متغيّر عام لتستخدمه وحدة الفيديو لاحقًا
+  window.__poemVideoAudioFile = file;
+
+  const objectUrl = URL.createObjectURL(file);
+  audioEl.src = objectUrl;
+  fileNameLabel.textContent = 'ملف الملقي: ' + file.name;
+
+  dotSource.classList.add('on-gold');
+  labelSource.textContent = 'الملقي: تم التحميل';
+  // إضافة جديدة: تنشيط نمط "مسلّح صوتيًا" على صفحة المقدمة (لو عاد إليها المستخدم)
+  stateIntro.classList.add('audio-armed');
+
+  // بناء قائمة الأبيات مسبقًا في الواجهة (بيانات فقط، لا صوت بعد)
+  buildVerseListDOM();
+
+  // تحليل الملف لاكتشاف الصمت الافتتاحي قبل بدء أي تشغيل
+  await detectOpeningSilence(file);
+
+  setAppMode('controls');
+}
+
+/* ---------------------------------------------------------------------
+   اكتشاف ومعالجة الصمت في بداية المقطع:
+   نقوم بفك ترميز الملف كاملاً في AudioBuffer (بدون تشغيله)، ثم نمسح
+   العينات من البداية حتى نجد أول لحظة تتجاوز فيها شدة الصوت العتبة
+   المحددة (SILENCE_AMPLITUDE_THRESHOLD). هذا الزمن يُخزَّن كـ
+   silenceOffsetSec ويُستخدم لاحقًا لضبط أزمنة الكاريوكي بحيث تبدأ
+   المزامنة فور صدور أول صوت فعلي من الملقي، دون انتظار الصمت.
+   --------------------------------------------------------------------- */
+async function detectOpeningSilence(file){
+  silenceInfoLabel.textContent = 'جارٍ تحليل الصمت الافتتاحي...';
+
+  try{
+    const arrayBuffer = await file.arrayBuffer();
+    const tempContext = new (window.AudioContext || window.webkitAudioContext)();
+    const decodedBuffer = await tempContext.decodeAudioData(arrayBuffer);
+
+    const channelData = decodedBuffer.getChannelData(0); // القناة الأولى تكفي للتحليل
+    const sampleRate = decodedBuffer.sampleRate;
+    const stepSamples = Math.floor(CONFIG.SILENCE_SCAN_STEP_SEC * sampleRate);
+
+    let silenceEndSample = 0;
+
+    for (let i = 0; i < channelData.length; i += stepSamples){
+      // حساب متوسط الشدة (RMS) لنافذة صغيرة من العينات
+      let sumSquares = 0;
+      const windowEnd = Math.min(i + stepSamples, channelData.length);
+      for (let j = i; j < windowEnd; j++){
+        sumSquares += channelData[j] * channelData[j];
+      }
+      const rms = Math.sqrt(sumSquares / (windowEnd - i));
+
+      if (rms > CONFIG.SILENCE_AMPLITUDE_THRESHOLD){
+        silenceEndSample = i;
+        break;
+      }
+    }
+
+    appState.silenceOffsetSec = silenceEndSample / sampleRate;
+
+    silenceInfoLabel.textContent =
+      `تم اكتشاف صمت افتتاحي مدته ${appState.silenceOffsetSec.toFixed(2)} ثانية، وسيتم تجاوزه تلقائيًا في المزامنة.`;
+
+    // عرض علامة الصمت على شريط التقدم بعد معرفة مدة الملف
+    audioEl.addEventListener('loadedmetadata', () => {
+      const duration = audioEl.duration || 1;
+      const pct = (appState.silenceOffsetSec / duration) * 100;
+      silenceMarker.style.display = 'block';
+      silenceMarker.style.right = pct + '%'; // RTL: من اليمين
+    }, { once: true });
+
+    await tempContext.close();
+  }catch(err){
+    console.error('تعذّر تحليل الصمت الافتتاحي:', err);
+    silenceInfoLabel.textContent = 'تعذّر تحليل الصمت الافتتاحي تلقائيًا؛ سيبدأ العرض من الثانية 0.';
+    appState.silenceOffsetSec = 0;
+  }
+}
+
+
+/* =========================================================================
+   6) محرك Web Audio API — بناء الرسم البياني الصوتي الكامل
+   (Source Graph + Mic Graph + Mixer Gains)
+   ========================================================================= */
+
+// تهيئة سياق صوتي واحد ومشترك، ومسار الملقي بالكامل (مرة واحدة فقط)
+function ensureAudioContextAndSourceGraph(){
+  if (audioEngine.audioContext) return;
+
+  audioEngine.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  // --- مسار الملقي: source -> gainSource -> analyserSource -> destination
+  audioEngine.sourceNode = audioEngine.audioContext.createMediaElementSource(audioEl);
+
+  audioEngine.sourceGainNode = audioEngine.audioContext.createGain();
+  audioEngine.sourceGainNode.gain.value = parseInt(sliderGainSource.value, 10) / 100;
+
+  audioEngine.sourceAnalyser = audioEngine.audioContext.createAnalyser();
+  audioEngine.sourceAnalyser.fftSize = CONFIG.FFT_SIZE;
+  audioEngine.sourceAnalyser.smoothingTimeConstant = CONFIG.SMOOTHING;
+
+  audioEngine.sourceNode
+    .connect(audioEngine.sourceGainNode)
+    .connect(audioEngine.sourceAnalyser)
+    .connect(audioEngine.audioContext.destination);
+
+  audioEngine.sourceFreqData = new Uint8Array(audioEngine.sourceAnalyser.frequencyBinCount);
+  audioEngine.sourceTimeData = new Uint8Array(audioEngine.sourceAnalyser.fftSize);
+}
+
+// تهيئة مسار الميكروفون بشكل مستقل (يُستدعى عند الضغط على "تفعيل الميكروفون")
+async function initMicrophoneGraph(){
+  try{
+    ensureAudioContextAndSourceGraph();
+
+    audioEngine.micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation:true, noiseSuppression:true, autoGainControl:true }
+    });
+
+    audioEngine.micSourceNode = audioEngine.audioContext.createMediaStreamSource(audioEngine.micStream);
+
+    audioEngine.micGainNode = audioEngine.audioContext.createGain();
+    audioEngine.micGainNode.gain.value = parseInt(sliderGainMic.value, 10) / 100;
+
+    audioEngine.micAnalyser = audioEngine.audioContext.createAnalyser();
+    audioEngine.micAnalyser.fftSize = CONFIG.FFT_SIZE;
+    audioEngine.micAnalyser.smoothingTimeConstant = CONFIG.SMOOTHING;
+
+    // مسار التحليل (لا يمر بالضرورة عبر السماعات إلا إذا رفع المستخدم مستوى المراقبة)
+    audioEngine.micSourceNode.connect(audioEngine.micAnalyser);
+
+    // مسار المراقبة الاختياري عبر السماعات (يُتحكم به بمقبض "مستوى مراقبة الميكروفون")
+    audioEngine.micAnalyser.connect(audioEngine.micGainNode);
+    audioEngine.micGainNode.connect(audioEngine.audioContext.destination);
+
+    audioEngine.micFreqData = new Uint8Array(audioEngine.micAnalyser.frequencyBinCount);
+    audioEngine.micTimeData = new Uint8Array(audioEngine.micAnalyser.fftSize);
+
+    appState.isMicReady = true;
+    dotMic.classList.add('on-emerald');
+    labelMic.textContent = 'الميكروفون: متصل ويستمع';
+    micIndicator.classList.add('listening');
+    micIndicatorLabel.textContent = 'يستمع الآن...';
+    btnMic.textContent = 'الميكروفون مفعّل ✓';
+    btnMic.disabled = true;
+
+  }catch(err){
+    console.error('تعذّر الوصول إلى الميكروفون:', err);
+    labelMic.textContent = 'الميكروفون: تعذّر الاتصال';
+    alert('لم نتمكن من الوصول إلى الميكروفون. تحقق من إذن المتصفح.');
+  }
+}
+
+/* ---------------------------------------------------------------------
+   دوال الميكسر: ضبط مستويات الصوت (Gain) لحظيًا عبر المقابض
+   --------------------------------------------------------------------- */
+sliderGainSource.addEventListener('input', () => {
+  const pct = parseInt(sliderGainSource.value, 10);
+  valGainSource.textContent = pct + '%';
+  if (audioEngine.sourceGainNode) audioEngine.sourceGainNode.gain.value = pct / 100;
+});
+
+sliderGainMic.addEventListener('input', () => {
+  const pct = parseInt(sliderGainMic.value, 10);
+  valGainMic.textContent = pct + '%';
+  if (audioEngine.micGainNode) audioEngine.micGainNode.gain.value = pct / 100;
+});
+
+
+/* =========================================================================
+   7) كاشف النبرة (Pitch Detection Engine)
+   يعتمد على خوارزمية الارتباط الذاتي (Autocorrelation) لتقدير التردد
+   الأساسي (Fundamental Frequency) من بيانات الموجة الزمنية، وهي تقنية
+   شائعة في معالجة الإشارات الصوتية لتقدير النبرة (Pitch) دون الحاجة
+   لمكتبات خارجية.
+   ========================================================================= */
+function detectPitchFromTimeDomain(timeData, sampleRate){
+  const bufferLength = timeData.length;
+
+  // تحويل بيانات Uint8 (0-255) إلى نطاق طبيعي -1..1
+  const normalized = new Float32Array(bufferLength);
+  let rms = 0;
+  for (let i = 0; i < bufferLength; i++){
+    const v = (timeData[i] - 128) / 128;
+    normalized[i] = v;
+    rms += v * v;
+  }
+  rms = Math.sqrt(rms / bufferLength);
+
+  // إشارة ضعيفة جدًا (صمت) -> لا يوجد تردد يُعتد به
+  if (rms < 0.01) return -1;
+
+  // نطاق البحث في الإزاحات الزمنية (Lags) بحسب أدنى/أعلى تردد بشري متوقع
+  const minLag = Math.floor(sampleRate / CONFIG.PITCH_MAX_HZ);
+  const maxLag = Math.floor(sampleRate / CONFIG.PITCH_MIN_HZ);
+
+  let bestLag = -1;
+  let bestCorrelation = 0;
+
+  for (let lag = minLag; lag <= maxLag && lag < bufferLength; lag++){
+    let correlation = 0;
+    for (let i = 0; i < bufferLength - lag; i++){
+      correlation += normalized[i] * normalized[i + lag];
+    }
+    correlation = correlation / (bufferLength - lag);
+
+    if (correlation > bestCorrelation){
+      bestCorrelation = correlation;
+      bestLag = lag;
+    }
+  }
+
+  // عتبة ثقة دنيا لقبول النتيجة كتردد صالح
+  if (bestLag === -1 || bestCorrelation < 0.01) return -1;
+
+  const estimatedFrequency = sampleRate / bestLag;
+  return estimatedFrequency;
+}
+
+// تحويل فرق الترددات بين مصدرين إلى وحدة "سنت" الموسيقية لعرض مؤشر تطابق دقيق
+function frequencyDifferenceInCents(freqA, freqB){
+  if (freqA <= 0 || freqB <= 0) return 0;
+  return 1200 * Math.log2(freqA / freqB);
+}
+
+/* =========================================================================
+   7ب) تحليل النطاقات الترددية (Frequency Bands) — إضافة جديدة
+   يقسّم بيانات الطيف الترددي الحقيقية (getByteFrequencyData) الصادرة عن
+   AnalyserNode الخاص بصوت الملقي إلى ثلاثة نطاقات (Bass/Mid/Treble)، ثم
+   يحسب متوسط الطاقة الطبيعي (0..1) لكل نطاق. هذه هي القيم "الحقيقية" التي
+   تقود توهّج الحاويات في الواجهة الصوتية التفاعلية — لا قيم عشوائية أو
+   محاكاة، بل مشتقة مباشرة من عيّنات الصوت الفعلية لحظة بلحظة.
+   ========================================================================= */
+function computeFrequencyBands(freqData, sampleRate, fftSize){
+  if (!freqData || !sampleRate) return { bass:0, mid:0, treble:0, overall:0 };
+
+  const nyquist = sampleRate / 2;
+  const binHz = nyquist / freqData.length;
+
+  const bassRange   = [60, 250];
+  const midRange    = [250, 2000];
+  const trebleRange = [2000, 6000];
+
+  const bandAverage = ([lo, hi]) => {
+    const startBin = Math.max(0, Math.floor(lo / binHz));
+    const endBin   = Math.min(freqData.length - 1, Math.ceil(hi / binHz));
+    if (endBin <= startBin) return 0;
+    let sum = 0;
+    for (let i = startBin; i <= endBin; i++) sum += freqData[i];
+    return (sum / (endBin - startBin + 1)) / 255; // تطبيع 0..1
+  };
+
+  const bass    = bandAverage(bassRange);
+  const mid     = bandAverage(midRange);
+  const treble  = bandAverage(trebleRange);
+
+  let overallSum = 0;
+  for (let i = 0; i < freqData.length; i++) overallSum += freqData[i];
+  const overall = (overallSum / freqData.length) / 255;
+
+  return { bass, mid, treble, overall };
+}
+
+// تنعيم أسّي بسيط (Exponential Smoothing) لتفادي اهتزاز بصري مزعج بين الإطارات
+function smoothTowards(current, target, smoothingFactor){
+  return current + (target - current) * smoothingFactor;
+}
+
+/* تطبيق قيم التفاعل الصوتي على متغيرات CSS المخصصة للحاويات الرئيسية.
+   يُستدعى من renderLoop في كل إطار بعد حساب النطاقات الترددية الحقيقية. */
+function applyAudioReactiveVisuals(bands, isActivelyPlaying){
+  const targetGlow   = isActivelyPlaying ? Math.min(1, bands.overall * 1.8) : 0;
+  const targetBass    = isActivelyPlaying ? Math.min(1, bands.bass * 2.1)    : 0;
+  const targetTreble  = isActivelyPlaying ? Math.min(1, bands.treble * 2.4)  : 0;
+
+  // صعود سريع نسبيًا (استجابة فورية للذروات)، وهبوط أبطأ (توهّج يخفت بسلاسة)
+  const attack  = 0.55;
+  const release = 0.12;
+
+  appState.reactiveGlow   = smoothTowards(appState.reactiveGlow, targetGlow,
+                              targetGlow > appState.reactiveGlow ? attack : release);
+  appState.reactiveBass    = smoothTowards(appState.reactiveBass, targetBass,
+                              targetBass > appState.reactiveBass ? attack : release);
+  appState.reactiveMid     = smoothTowards(appState.reactiveMid, bands.mid,
+                              bands.mid > appState.reactiveMid ? attack : release);
+  appState.reactiveTreble  = smoothTowards(appState.reactiveTreble, targetTreble,
+                              targetTreble > appState.reactiveTreble ? attack : release);
+
+  if (mixerOuterBox){
+    mixerOuterBox.style.setProperty('--reactive-glow', appState.reactiveGlow.toFixed(3));
+    mixerOuterBox.style.setProperty('--reactive-bass', appState.reactiveBass.toFixed(3));
+    mixerOuterBox.style.setProperty('--reactive-treble', appState.reactiveTreble.toFixed(3));
+  }
+  if (activeVerseBoxEl){
+    // ذروة الأبيات (شدة عالية + وضوح متوسط عالٍ) تُترجم لتوهّج أقوى داخل صندوق البيت النشط
+    const verseGlow = Math.min(1, (appState.reactiveGlow * 0.6) + (appState.reactiveMid * 0.6));
+    activeVerseBoxEl.style.setProperty('--verse-glow', verseGlow.toFixed(3));
+  }
+}
+
+
+/* =========================================================================
+   8) نظام المعايرة (Manual + Auto Calibration)
+   ========================================================================= */
+
+// المعايرة اليدوية: مقبض إزاحة زمنية بالميلي ثانية يُطبَّق على مقارنة
+// توقيت الميكروفون بتوقيت الملقي (مفيد لتعويض تأخير الأجهزة/المتصفح)
+sliderManualOffset.addEventListener('input', () => {
+  appState.manualCalibrationOffsetMs = parseInt(sliderManualOffset.value, 10);
+  valManualOffset.textContent = appState.manualCalibrationOffsetMs + ' ms';
+});
+
+/* ---------------------------------------------------------------------
+   المعايرة التلقائية: تشغّل نافذة اختبار قصيرة أثناء تشغيل الملقي،
+   وتراقب أول لحظة يتجاوز فيها صوت المستخدم عتبة معينة (Onset Detection)
+   بعد أن يتجاوز صوت الملقي نفس العتبة، ثم تحسب الفارق الزمني بينهما
+   وتضبط مقبض الإزاحة اليدوية تلقائيًا بالنتيجة.
+   --------------------------------------------------------------------- */
+async function runAutoCalibration(){
+  if (!appState.isMicReady){
+    alert('يرجى تفعيل الميكروفون أولًا قبل بدء المعايرة التلقائية.');
+    return;
+  }
+  if (appState.isCalibrating) return;
+
+  appState.isCalibrating = true;
+  btnAutoCalibrate.disabled = true;
+  btnAutoCalibrate.textContent = 'جارٍ الاستماع... رددّ مع الملقي الآن';
+
+  // إعادة الانطلاق من بداية أول شطر فعلي (بعد الصمت) لضمان مرجع موحّد
+  audioEl.currentTime = appState.silenceOffsetSec;
+  await audioEl.play();
+
+  const startTimestamp = performance.now();
+  let sourceOnsetTime = null;
+  let micOnsetTime = null;
+
+  await new Promise((resolve) => {
+    const checkInterval = setInterval(() => {
+      const elapsed = performance.now() - startTimestamp;
+
+      // قياس شدة صوت الملقي حاليًا
+      if (audioEngine.sourceAnalyser){
+        audioEngine.sourceAnalyser.getByteTimeDomainData(audioEngine.sourceTimeData);
+        const srcRms = computeRmsFromByteData(audioEngine.sourceTimeData);
+        if (sourceOnsetTime === null && srcRms > 0.04){
+          sourceOnsetTime = elapsed;
+        }
+      }
+
+      // قياس شدة صوت المستخدم حاليًا
+      if (audioEngine.micAnalyser){
+        audioEngine.micAnalyser.getByteTimeDomainData(audioEngine.micTimeData);
+        const micRms = computeRmsFromByteData(audioEngine.micTimeData);
+        if (micOnsetTime === null && micRms > 0.04 && sourceOnsetTime !== null){
+          micOnsetTime = elapsed;
+        }
+      }
+
+      if (elapsed > CONFIG.CALIBRATION_TEST_WINDOW_MS || (sourceOnsetTime !== null && micOnsetTime !== null)){
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 20);
+  });
+
+  if (sourceOnsetTime !== null && micOnsetTime !== null){
+    const offset = Math.round(micOnsetTime - sourceOnsetTime);
+    const clamped = Math.max(-1000, Math.min(1000, offset));
+    appState.autoCalibrationOffsetMs = clamped;
+    appState.manualCalibrationOffsetMs = clamped;
+    sliderManualOffset.value = clamped;
+    valManualOffset.textContent = clamped + ' ms';
+    silenceInfoLabel.textContent = `تمت المعايرة التلقائية بنجاح: إزاحة ${clamped} ms.`;
+  } else {
+    silenceInfoLabel.textContent = 'تعذّر رصد استجابة كافية أثناء المعايرة، حاول مجددًا وتحدّث مباشرة بعد الملقي.';
+  }
+
+  btnAutoCalibrate.disabled = false;
+  btnAutoCalibrate.textContent = 'معايرة تلقائية للميكروفون';
+  appState.isCalibrating = false;
+}
+
+function computeRmsFromByteData(byteData){
+  let sumSquares = 0;
+  for (let i = 0; i < byteData.length; i++){
+    const v = (byteData[i] - 128) / 128;
+    sumSquares += v * v;
+  }
+  return Math.sqrt(sumSquares / byteData.length);
+}
+
+
+/* =========================================================================
+   9) محرك الكاريوكي (Color Filling + Auto-scroll)
+   ========================================================================= */
+
+function buildVerseListDOM(){
+  verseListInner.innerHTML = '';
+  appState.verseRowElements = [];
+
+  VERSES_DATA.forEach((verse) => {
+    const row = document.createElement('div');
+    row.className = 'verse-row';
+    row.dataset.index = verse.index;
+    row.textContent = verse.text;
+    verseListInner.appendChild(row);
+    appState.verseRowElements.push(row);
+  });
+}
+
+function resetVerseListDOM(){
+  appState.verseRowElements.forEach(row => row.classList.remove('current', 'past'));
+}
+
+function clearActiveVerseBox(){
+  activeVerseText.className = 'active-verse-text';
+  activeVerseText.innerHTML = '';
+}
+
+function buildActiveVerseWords(text){
+  const words = text.split(' ');
+  activeVerseText.innerHTML = words.map(w => `<span class="word">${w}</span>`).join(' ');
+}
+
+// حساب أزمنة الشطر الفعلية بعد إضافة إزاحة الصمت الافتتاحي المكتشفة
+function getAdjustedVerseTiming(verse){
+  return {
+    start: verse.start + appState.silenceOffsetSec,
+    end:   verse.end   + appState.silenceOffsetSec,
+  };
+}
+
+function findVerseIndexForTime(t){
+  for (let i = 0; i < VERSES_DATA.length; i++){
+    const { start, end } = getAdjustedVerseTiming(VERSES_DATA[i]);
+    if (t >= start && t < end) return i;
+  }
+  return -1;
+}
+
+// تلوين تدريجي للكلمات (Color Filling) بحسب نسبة تقدم الزمن داخل الشطر،
+// مع "دفعة" لونية زمردية إضافية إن كان مستوى صوت المستخدم مرتفعًا لحظتها
+// (تعبير بصري عن مشاركته الفعلية في الإلقاء الحالي)
+function updateWordFillingForVerse(verse, currentTime, userIsLoud){
+  const wordEls = activeVerseText.querySelectorAll('.word');
+  if (wordEls.length === 0) return;
+
+  const { start, end } = getAdjustedVerseTiming(verse);
+  const verseDuration = end - start;
+  const elapsedInVerse = Math.max(0, currentTime - start);
+  const progressRatio = Math.min(1, elapsedInVerse / verseDuration);
+  const wordsToFill = Math.round(wordEls.length * progressRatio);
+
+  wordEls.forEach((wordEl, i) => {
+    const shouldFill = i < wordsToFill;
+    wordEl.classList.toggle('filled', shouldFill && !userIsLoud);
+    wordEl.classList.toggle('mic-boost', shouldFill && userIsLoud);
+  });
+}
+
+/* إضافة جديدة: اختيار نمط دخول بصري مختلف لكل بيت (دخول انسيابي/توهّج/تكبير/
+   انزلاق)، بحيث لا يظهر كل بيت بنفس الحركة تمامًا — تنويع تفاعلي بسيط لكن
+   يمنح كل شطر إحساسًا بصريًا خاصًا به دون أي منطق عشوائي (يعتمد على رقم
+   البيت نفسه لضمان ثبات نفس النمط عند إعادة تشغيل نفس البيت). */
+function pickVerseEnterVariant(verseIndex){
+  const variants = appState.verseEnterVariants;
+  return variants[verseIndex % variants.length];
+}
+
+function transitionToVerse(newVerse){
+  activeVerseText.classList.remove('fade-in');
+  activeVerseText.classList.add('fade-out');
+
+  setTimeout(() => {
+    buildActiveVerseWords(newVerse.text);
+    activeVerseText.classList.remove('fade-out');
+    // إزالة أي نمط دخول سابق قبل تطبيق النمط الجديد الخاص بهذا البيت
+    appState.verseEnterVariants.forEach(v => activeVerseText.classList.remove(v));
+    activeVerseText.classList.add(pickVerseEnterVariant(newVerse.index));
+    void activeVerseText.offsetWidth; // إجبار إعادة التدفق (reflow) لتشغيل الانتقال من جديد
+    activeVerseText.classList.add('fade-in');
+  }, 260);
+}
+
+function markVerseAsPast(index){
+  const row = appState.verseRowElements.find(r => parseInt(r.dataset.index, 10) === index);
+  if (row){ row.classList.remove('current'); row.classList.add('past'); }
+}
+
+function markVerseAsCurrent(index){
+  appState.verseRowElements.forEach(row => row.classList.remove('current'));
+  const row = appState.verseRowElements.find(r => parseInt(r.dataset.index, 10) === index);
+  if (row){
+    row.classList.add('current');
+    row.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+}
+
+function fadeOutActiveVerse(){
+  activeVerseText.classList.remove('fade-in');
+  activeVerseText.classList.add('fade-out');
+}
+
+
+/* =========================================================================
+   10) حلقة الرسم الرئيسية (Render Loop)
+   تعمل باستمرار عبر requestAnimationFrame لتحديث: الموجات، مقاييس
+   المستوى، كاشف النبرة، محرك المزامنة، وتلوين الكلمات.
+   ========================================================================= */
+
+function fitCanvasToContainer(canvas){
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { width: rect.width, height: rect.height };
+}
+
+function drawGrid(ctx, width, height){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+  ctx.lineWidth = 1;
+  const stepX = width / 10;
+  for (let gx = stepX; gx < width; gx += stepX){
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, height); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath(); ctx.moveTo(0, height/2); ctx.lineTo(width, height/2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawWaveform(ctx, canvas, timeData, strokeColor, glowColor){
+  const { width, height } = fitCanvasToContainer(canvas);
+  ctx.clearRect(0, 0, width, height);
+  drawGrid(ctx, width, height);
+  if (!timeData) return;
+
+  ctx.lineWidth = 2.2;
+  ctx.strokeStyle = strokeColor;
+  ctx.shadowColor = glowColor;
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+
+  const sliceWidth = width / timeData.length;
+  let x = 0;
+  for (let i = 0; i < timeData.length; i++){
+    const v = (timeData[i] - 128) / 128.0;
+    const y = (height / 2) + (v * (height / 2) * 0.9);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    x += sliceWidth;
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+function updateLevelMeter(meterEl, byteTimeData){
+  if (!byteTimeData){ meterEl.style.width = '0%'; return; }
+  const rms = computeRmsFromByteData(byteTimeData);
+  const pct = Math.min(100, rms * 220);
+  meterEl.style.width = pct + '%';
+}
+
+function updatePitchDisplays(sourceHz, micHz){
+  pitchSourceHzEl.textContent = sourceHz > 0 ? Math.round(sourceHz) + ' Hz' : '-- Hz';
+  pitchMicHzEl.textContent    = micHz    > 0 ? Math.round(micHz)    + ' Hz' : '-- Hz';
+
+  if (sourceHz > 0 && micHz > 0){
+    const cents = frequencyDifferenceInCents(micHz, sourceHz);
+    const clampedCents = Math.max(-600, Math.min(600, cents));
+    const needlePct = 50 + (clampedCents / 600) * 50;
+    pitchNeedle.style.left = needlePct + '%';
+
+    if (Math.abs(cents) < 60){
+      pitchMatchLabel.textContent = 'تطابق ممتاز';
+      pitchMatchLabel.style.color = 'var(--emerald)';
+    } else if (cents > 0){
+      pitchMatchLabel.textContent = 'نبرتك أعلى من الملقي';
+      pitchMatchLabel.style.color = 'var(--gold)';
+    } else {
+      pitchMatchLabel.textContent = 'نبرتك أخفض من الملقي';
+      pitchMatchLabel.style.color = 'var(--gold)';
+    }
+  } else {
+    pitchNeedle.style.left = '50%';
+    pitchMatchLabel.textContent = '--';
+    pitchMatchLabel.style.color = 'var(--muted)';
+  }
+}
+
+function renderLoop(){
+  requestAnimationFrame(renderLoop);
+
+  // --- تحديث موجة الملقي ومقاييسه ---
+  let sourcePitch = -1;
+  if (audioEngine.sourceAnalyser){
+    audioEngine.sourceAnalyser.getByteFrequencyData(audioEngine.sourceFreqData);
+    audioEngine.sourceAnalyser.getByteTimeDomainData(audioEngine.sourceTimeData);
+    drawWaveform(ctxSource, canvasSource, audioEngine.sourceTimeData, '#d4af37', 'rgba(212,175,55,.55)');
+    updateLevelMeter(meterSource, audioEngine.sourceTimeData);
+    sourcePitch = detectPitchFromTimeDomain(audioEngine.sourceTimeData, audioEngine.audioContext.sampleRate);
+  }
+
+  // --- إضافة جديدة: التفاعل الصوتي الحي — استخراج النطاقات الترددية الحقيقية
+  //     من صوت الملقي وتطبيقها على توهّج الحاويات (Audio-Reactive UI) ---
+  if (audioEngine.sourceAnalyser){
+    const bands = computeFrequencyBands(
+      audioEngine.sourceFreqData,
+      audioEngine.audioContext.sampleRate,
+      CONFIG.FFT_SIZE
+    );
+    applyAudioReactiveVisuals(bands, !audioEl.paused && appState.isMixerVisible);
+  }
+
+  // --- تحديث موجة الميكروفون ومقاييسه ---
+  let micPitch = -1;
+  let micIsLoud = false;
+  if (audioEngine.micAnalyser){
+    audioEngine.micAnalyser.getByteFrequencyData(audioEngine.micFreqData);
+    audioEngine.micAnalyser.getByteTimeDomainData(audioEngine.micTimeData);
+    drawWaveform(ctxMic, canvasMic, audioEngine.micTimeData, '#34d399', 'rgba(52,211,153,.55)');
+    updateLevelMeter(meterMic, audioEngine.micTimeData);
+    micPitch = detectPitchFromTimeDomain(audioEngine.micTimeData, audioEngine.audioContext.sampleRate);
+    micIsLoud = computeRmsFromByteData(audioEngine.micTimeData) > 0.05;
+  }
+
+  updatePitchDisplays(sourcePitch, micPitch);
+
+  // --- محرك المزامنة والكاريوكي ---
+  if (!audioEl.paused && appState.isMixerVisible){
+    updateProgressUI();
+
+    const t = audioEl.currentTime;
+    const newIndex = findVerseIndexForTime(t);
+
+    if (newIndex !== appState.currentVerseIndex){
+      if (appState.currentVerseIndex !== -1){
+        const prevTiming = getAdjustedVerseTiming(VERSES_DATA[appState.currentVerseIndex]);
+        if (prevTiming.end <= t) markVerseAsPast(appState.currentVerseIndex);
+        // إضافة جديدة: تقييم مشاركة المستخدم في البيت المنتهي لأجل عداد التناغم
+        evaluatePreviousVerseEngagement(appState.currentVerseIndex);
+      }
+      appState.currentVerseIndex = newIndex;
+      resetVerseEngagementCounters(); // إضافة جديدة: إعادة ضبط عدّادات المشاركة للبيت الجديد
+      if (appState.currentVerseIndex !== -1){
+        const verse = VERSES_DATA[appState.currentVerseIndex];
+        transitionToVerse(verse);
+        markVerseAsCurrent(appState.currentVerseIndex);
+      }
+    }
+
+    if (appState.currentVerseIndex !== -1){
+      updateWordFillingForVerse(VERSES_DATA[appState.currentVerseIndex], t, micIsLoud);
+      // إضافة جديدة: تجميع إحصاء المشاركة الصوتية لهذا البيت لحظيًا
+      appState.currentVerseFrameCount++;
+      if (micIsLoud) appState.currentVerseLoudFrameCount++;
+    }
+  }
+}
+
+
+/* =========================================================================
+   11) ربط أحداث الواجهة (Event Wiring)
+   ========================================================================= */
+
+btnPlay.addEventListener('click', async () => {
+  ensureAudioContextAndSourceGraph();
+  if (audioEngine.audioContext.state === 'suspended') await audioEngine.audioContext.resume();
+
+  // البدء مباشرة من نهاية الصمت الافتتاحي المكتشف، لضمان مزامنة فورية
+  if (audioEl.currentTime < appState.silenceOffsetSec){
+    audioEl.currentTime = appState.silenceOffsetSec;
+  }
+
+  try{
+    await audioEl.play();
+    btnPlay.disabled = true;
+    btnPause.disabled = false;
+    btnRestart.disabled = false;
+    dotPlay.classList.add('on-gold');
+    labelPlay.textContent = 'التشغيل: جارٍ الآن';
+    setAppMode('mixer');
+  }catch(err){
+    console.error('تعذّر تشغيل الملف الصوتي:', err);
+    alert('تعذّر تشغيل هذا الملف.');
+  }
+});
+
+btnPause.addEventListener('click', () => {
+  audioEl.pause();
+  btnPlay.disabled = false;
+  btnPause.disabled = true;
+  dotPlay.classList.remove('on-gold');
+  labelPlay.textContent = 'التشغيل: متوقف مؤقتًا';
+});
+
+btnRestart.addEventListener('click', () => {
+  audioEl.currentTime = appState.silenceOffsetSec;
+  appState.currentVerseIndex = -1;
+  resetVerseListDOM();
+  clearActiveVerseBox();
+  updateProgressUI();
+});
+
+btnMic.addEventListener('click', initMicrophoneGraph);
+btnAutoCalibrate.addEventListener('click', runAutoCalibration);
+
+audioEl.addEventListener('loadedmetadata', updateProgressUI);
+
+/* إضافة جديدة: بمجرد معرفة المدة الحقيقية للملف الصوتي المرفوع، نعيد توزيع
+   أزمنة الأبيات الـ71 تناسبيًا عليها (ما لم يكن المستخدم قد ضبطها يدويًا)،
+   ثم نُحدّث جدول التوقيت القابل للتعديل. */
+audioEl.addEventListener('loadedmetadata', () => {
+  recalcVerseTimingsFromRealDuration(audioEl.duration);
+  renderTimingTable();
+});
+
+audioEl.addEventListener('ended', () => {
+  btnPlay.disabled = false;
+  btnPause.disabled = true;
+  dotPlay.classList.remove('on-gold');
+  labelPlay.textContent = 'التشغيل: انتهى المقطع';
+  if (appState.currentVerseIndex !== -1){
+    fadeOutActiveVerse();
+    appState.currentVerseIndex = -1;
+  }
+});
+
+progressTrack.addEventListener('click', (e) => {
+  const rect = progressTrack.getBoundingClientRect();
+  let ratio = (rect.right - e.clientX) / rect.width; // اتجاه RTL
+  ratio = Math.max(0, Math.min(1, ratio));
+  audioEl.currentTime = ratio * (audioEl.duration || 0);
+});
+
+function formatTime(seconds){
+  if (!isFinite(seconds)) return '00:00';
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateProgressUI(){
+  const duration = audioEl.duration || 0;
+  const current  = audioEl.currentTime || 0;
+  const pct = duration > 0 ? (current / duration) * 100 : 0;
+  progressFill.style.width = pct + '%';
+  timeCurrentEl.textContent = formatTime(current);
+  timeTotalEl.textContent = formatTime(duration);
+}
+
+window.addEventListener('resize', () => {
+  fitCanvasToContainer(canvasSource);
+  fitCanvasToContainer(canvasMic);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  fitCanvasToContainer(canvasSource);
+  fitCanvasToContainer(canvasMic);
+});
+
+/* =========================================================================
+   12) جدول تحرير التوقيت + التصدير/الاستيراد (إضافة جديدة)
+   ========================================================================= */
+
+// يبني/يعيد بناء جدول التوقيت القابل للتحرير من VERSES_DATA الحالية
+function renderTimingTable(){
+  timingTableBody.innerHTML = '';
+
+  VERSES_DATA.forEach((verse) => {
+    const tr = document.createElement('tr');
+    tr.dataset.index = verse.index;
+
+    const tdIndex = document.createElement('td');
+    tdIndex.textContent = verse.index + 1;
+
+    const tdText = document.createElement('td');
+    tdText.className = 'verse-snippet';
+    tdText.textContent = verse.text;
+    tdText.title = verse.text;
+
+    const tdStart = document.createElement('td');
+    const inputStart = document.createElement('input');
+    inputStart.type = 'number'; inputStart.step = '0.01';
+    inputStart.value = verse.start.toFixed(2);
+    inputStart.addEventListener('change', () => {
+      verse.start = parseFloat(inputStart.value) || 0;
+      appState.timingWasManuallyEdited = true;
+    });
+    tdStart.appendChild(inputStart);
+
+    const tdEnd = document.createElement('td');
+    const inputEnd = document.createElement('input');
+    inputEnd.type = 'number'; inputEnd.step = '0.01';
+    inputEnd.value = verse.end.toFixed(2);
+    inputEnd.addEventListener('change', () => {
+      verse.end = parseFloat(inputEnd.value) || 0;
+      appState.timingWasManuallyEdited = true;
+    });
+    tdEnd.appendChild(inputEnd);
+
+    const tdJump = document.createElement('td');
+    const jumpBtn = document.createElement('button');
+    jumpBtn.className = 'jump-btn';
+    jumpBtn.textContent = 'قفز ⏵';
+    jumpBtn.addEventListener('click', () => {
+      audioEl.currentTime = Math.max(0, verse.start);
+    });
+    tdJump.appendChild(jumpBtn);
+
+    tr.append(tdIndex, tdText, tdStart, tdEnd, tdJump);
+    timingTableBody.appendChild(tr);
+  });
+}
+
+// تصدير التوقيت الحالي كملف JSON قابل لإعادة الاستخدام مع نفس التسجيل
+btnExportTiming.addEventListener('click', () => {
+  const payload = {
+    poem: 'السيف أصدق أنباء من الكتب - أبو تمام',
+    silenceOffsetSec: appState.silenceOffsetSec,
+    verses: VERSES_DATA.map(v => ({ index: v.index, start: v.start, end: v.end })),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'karaoke-timing-abu-tammam.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// استيراد ملف توقيت محفوظ مسبقًا وتطبيقه على VERSES_DATA
+btnImportTrigger.addEventListener('click', () => importTimingInput.click());
+importTimingInput.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data.verses)) throw new Error('صيغة ملف غير صالحة');
+
+    data.verses.forEach((v) => {
+      if (VERSES_DATA[v.index]){
+        VERSES_DATA[v.index].start = v.start;
+        VERSES_DATA[v.index].end = v.end;
+      }
+    });
+    appState.timingWasManuallyEdited = true;
+    renderTimingTable();
+    silenceInfoLabel.textContent = 'تم استيراد ملف توقيت محفوظ بنجاح وتطبيقه على القصيدة.';
+  }catch(err){
+    console.error('تعذّر استيراد ملف التوقيت:', err);
+    alert('تعذّر قراءة ملف التوقيت. تأكد أنه ملف JSON صادر من هذا التطبيق.');
+  }
+});
+
+// إعادة التوزيع التلقائي التناسبي (تجاهل أي تعديل يدوي سابق)
+btnResetTiming.addEventListener('click', () => {
+  appState.timingWasManuallyEdited = false;
+  recalcVerseTimingsFromRealDuration(audioEl.duration || DEFAULT_PLACEHOLDER_DURATION_SEC);
+  renderTimingTable();
+});
+
+
+/* =========================================================================
+   13) محرك المزامنة اليدوية (Tap-Sync Engine) — إضافة جديدة
+   الحل العملي والدقيق لمزامنة أي تسجيل صوتي حقيقي: ينقر المستخدم عند بداية
+   كل شطر فعليًا أثناء الاستماع، فتُسجَّل اللحظة الحقيقية من audioEl.currentTime.
+   ========================================================================= */
+
+function updateTapSyncLabels(){
+  const total = POEM_LINES.length;
+  tapSyncProgressEl.textContent = `${appState.tapSyncTimestamps.length} / ${total} شطرًا مُزامنًا`;
+
+  if (!appState.isTapSyncActive){
+    tapSyncCurrentLbl.textContent = 'اضغط "بدء وضع المزامنة اليدوية" لتبدأ';
+    tapSyncNextLbl.textContent = '—';
+    return;
+  }
+
+  const nextIdx = appState.tapSyncNextIndex;
+  if (nextIdx < total){
+    tapSyncCurrentLbl.textContent = POEM_LINES[nextIdx];
+    tapSyncNextLbl.textContent = (nextIdx + 1 < total)
+      ? 'التالي بعده: ' + POEM_LINES[nextIdx + 1]
+      : 'هذا هو آخر شطر في القصيدة';
+  } else {
+    tapSyncCurrentLbl.textContent = '✓ تمت مزامنة جميع الأشطر — اضغط "إنهاء وحفظ التوقيت"';
+    tapSyncNextLbl.textContent = '—';
+  }
+}
+
+function recordTapSyncTimestamp(){
+  if (!appState.isTapSyncActive) return;
+  if (appState.tapSyncNextIndex >= POEM_LINES.length) return;
+
+  appState.tapSyncTimestamps.push(audioEl.currentTime);
+  appState.tapSyncNextIndex++;
+  btnTapSyncUndo.disabled = appState.tapSyncTimestamps.length === 0;
+  btnTapSyncFinish.disabled = appState.tapSyncTimestamps.length === 0;
+  updateTapSyncLabels();
+}
+
+btnTapSyncStart.addEventListener('click', () => {
+  appState.isTapSyncActive = !appState.isTapSyncActive;
+  btnTapSyncStart.classList.toggle('active', appState.isTapSyncActive);
+  btnTapSyncStart.textContent = appState.isTapSyncActive
+    ? 'إيقاف وضع المزامنة اليدوية'
+    : 'بدء وضع المزامنة اليدوية';
+
+  if (appState.isTapSyncActive){
+    appState.tapSyncNextIndex = 0;
+    appState.tapSyncTimestamps = [];
+    btnTapSyncUndo.disabled = true;
+    btnTapSyncFinish.disabled = true;
+  }
+  updateTapSyncLabels();
+});
+
+btnTapSyncUndo.addEventListener('click', () => {
+  if (appState.tapSyncTimestamps.length === 0) return;
+  appState.tapSyncTimestamps.pop();
+  appState.tapSyncNextIndex = Math.max(0, appState.tapSyncNextIndex - 1);
+  btnTapSyncUndo.disabled = appState.tapSyncTimestamps.length === 0;
+  btnTapSyncFinish.disabled = appState.tapSyncTimestamps.length === 0;
+  updateTapSyncLabels();
+});
+
+btnTapSyncFinish.addEventListener('click', () => {
+  const stamps = appState.tapSyncTimestamps;
+  if (stamps.length === 0) return;
+
+  stamps.forEach((t, i) => {
+    VERSES_DATA[i].start = t;
+    VERSES_DATA[i].end = (i + 1 < stamps.length) ? stamps[i + 1] : (audioEl.duration || t + 4);
+  });
+  // أي أشطر لم تُزامَن بعد (إن أُنهيت العملية مبكرًا) تُترك بتوزيعها التناسبي القديم
+  appState.timingWasManuallyEdited = true;
+
+  appState.isTapSyncActive = false;
+  btnTapSyncStart.classList.remove('active');
+  btnTapSyncStart.textContent = 'بدء وضع المزامنة اليدوية';
+  updateTapSyncLabels();
+  renderTimingTable();
+
+  silenceInfoLabel.textContent = `تم حفظ مزامنة يدوية دقيقة لـ ${stamps.length} شطرًا. يمكنك الآن تصدير التوقيت.`;
+});
+
+// مفتاح المسافة (Space) هو أسرع وسيلة للنقر أثناء الاستماع دون إبعاد اليد عن لوحة المفاتيح
+document.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space') return;
+  if (!appState.isTapSyncActive) return;
+  // تجاهل الضغط إن كان التركيز داخل حقل إدخال نصي/رقمي لتفادي تعارضه مع الكتابة
+  const tag = (document.activeElement && document.activeElement.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+  e.preventDefault();
+  recordTapSyncTimestamp();
+});
+
+
+/* =========================================================================
+   14) عداد التناغم (Streak) وتأثير إتمام البيت — إضافة جديدة
+   يقيس مدى مشاركة المستخدم صوتيًا (عبر الميكروفون) خلال كل بيت، وإن كانت
+   مشاركته كافية طوال البيت يُحسب له "تناغم" متتالٍ مع تأثير بصري احتفالي.
+   ========================================================================= */
+
+function resetVerseEngagementCounters(){
+  appState.currentVerseFrameCount = 0;
+  appState.currentVerseLoudFrameCount = 0;
+}
+resetVerseEngagementCounters();
+
+function fireVerseCompletionBurst(){
+  verseCompleteBurst.classList.remove('fire');
+  void verseCompleteBurst.offsetWidth; // إعادة تشغيل الأنيميشن من جديد
+  verseCompleteBurst.classList.add('fire');
+}
+
+function updateStreakBadge(){
+  if (appState.currentStreakCount > 0){
+    streakBadge.classList.add('show');
+    streakCountLabel.textContent = appState.currentStreakCount;
+  } else {
+    streakBadge.classList.remove('show');
+  }
+}
+
+// تُستدعى عند انتقال المزامنة من بيت إلى آخر، لتقييم مدى مشاركة المستخدم في البيت المنتهي
+function evaluatePreviousVerseEngagement(prevIndex){
+  if (prevIndex < 0 || !appState.isMicReady) return;
+  if (appState.currentVerseFrameCount === 0) return;
+
+  const engagementRatio = appState.currentVerseLoudFrameCount / appState.currentVerseFrameCount;
+
+  if (engagementRatio >= 0.35){
+    appState.currentStreakCount++;
+    if (appState.lastBurstVerseIndex !== prevIndex){
+      fireVerseCompletionBurst();
+      appState.lastBurstVerseIndex = prevIndex;
+    }
+  } else {
+    appState.currentStreakCount = 0;
+  }
+  updateStreakBadge();
+}
+
+
+/* =========================================================================
+   15) شريط البحث/القفز السريع بين الأبيات الـ71 — إضافة جديدة
+   ========================================================================= */
+
+function applyVerseJumpFilter(query){
+  appState.verseFilterQuery = query.trim();
+  let matchCount = 0;
+  let firstMatch = null;
+
+  appState.verseRowElements.forEach((row) => {
+    const text = row.textContent;
+    const matches = appState.verseFilterQuery.length > 0 && text.includes(appState.verseFilterQuery);
+    row.style.outline = matches ? '1px solid var(--gold)' : '';
+    if (matches){
+      matchCount++;
+      if (!firstMatch) firstMatch = row;
+    }
+  });
+
+  if (appState.verseFilterQuery.length === 0){
+    verseJumpCount.textContent = POEM_LINES.length + ' بيتًا';
+  } else {
+    verseJumpCount.textContent = matchCount + ' نتيجة';
+  }
+  return firstMatch;
+}
+
+verseJumpInput.addEventListener('input', (e) => {
+  applyVerseJumpFilter(e.target.value);
+});
+
+verseJumpInput.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter') return;
+  const firstMatch = applyVerseJumpFilter(verseJumpInput.value);
+  if (firstMatch){
+    const idx = parseInt(firstMatch.dataset.index, 10);
+    const { start } = getAdjustedVerseTiming(VERSES_DATA[idx]);
+    audioEl.currentTime = Math.max(0, start);
+    firstMatch.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+});
+
+
+// انطلاق حلقة الرسم فور تحميل الملف بالكامل
+renderLoop();
+
+/* =====================================================================
+   إضافة مستقلة (Sub-module): ربط الصفحة بخادم poem_karaoke_module محليًا
+   لتوليد فيديو القصيدة. لا تتداخل مع أي متغيرات أو دوال أصلية أعلاه —
+   تعتمد فقط على window.__poemVideoAudioFile المحفوظ في handleFileSelected.
+   ===================================================================== */
+(function initPoemVideoModule(){
+  const POEM_VIDEO_SERVER_URL = 'http://127.0.0.1:5000/generate-poem-video';
+
+  const imageInput   = document.getElementById('poem-video-image-input');
+  const generateBtn  = document.getElementById('btn-generate-poem-video');
+  const healthBtn    = document.getElementById('btn-check-server-health');
+  const statusLabel  = document.getElementById('poem-video-status');
+  const videoPreview = document.getElementById('poem-video-preview');
+
+  if (!generateBtn) return; // في حال لم توجد البطاقة لأي سبب، لا تفعل شيئًا
+
+  if (healthBtn){
+    healthBtn.addEventListener('click', async () => {
+      statusLabel.textContent = 'جارٍ فحص الاتصال بالخادم...';
+      try {
+        const res = await fetch('http://127.0.0.1:5000/health');
+        if (res.ok){
+          statusLabel.textContent = 'الخادم يعمل بشكل سليم ✅ يمكنك التوليد الآن.';
+        } else {
+          statusLabel.textContent = 'الخادم استجاب لكن برمز خطأ: ' + res.status;
+        }
+      } catch (err) {
+        statusLabel.textContent = 'تعذّر الوصول للخادم إطلاقًا. تأكد أنك شغّلت "python server.py" في نافذة طرفية منفصلة وتركتها تعمل.';
+      }
+    });
+  }
+
+  generateBtn.addEventListener('click', async () => {
+    const audioFile = window.__poemVideoAudioFile;
+    const imageFile = imageInput.files && imageInput.files[0];
+
+    if (!audioFile){
+      statusLabel.textContent = 'ارفع أولًا ملف صوت الملقي من الخطوة الأولى بالأعلى.';
+      return;
+    }
+    // الصورة اختيارية الآن: لو ما اختار المستخدم صورة، السيرفر يولّد
+    // خلفية داكنة احترافية تلقائيًا بدل ما يتوقف النظام.
+    statusLabel.textContent = imageFile
+      ? 'جارٍ توليد الفيديو... قد يستغرق ذلك بضع ثوانٍ حتى دقيقة.'
+      : 'لا توجد صورة مختارة — سيُستخدم خلفية افتراضية تلقائيًا. جارٍ التوليد...';
+    generateBtn.disabled = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      if (imageFile) formData.append('image', imageFile);
+
+      const response = await fetch(POEM_VIDEO_SERVER_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok){
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || ('فشل الطلب: ' + response.status));
+      }
+
+      const data = await response.json();
+      const videoUrl = 'http://127.0.0.1:5000' + data.video_url;
+
+      videoPreview.src = videoUrl;
+      videoPreview.style.display = 'block';
+      statusLabel.textContent = 'تم توليد الفيديو بنجاح ✅';
+    } catch (err) {
+      statusLabel.textContent = 'خطأ: تأكد أن خادم poem_karaoke_module يعمل (python server.py). ' + err.message;
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
