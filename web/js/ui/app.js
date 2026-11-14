@@ -10,6 +10,7 @@ import { LIVE_THRESHOLDS } from '../core/live.js';
 import { PitchView } from './pitchview.js';
 import { TimingEditor } from './editor.js';
 import { videoCard } from './video.js';
+import { Cloud, uuid, summarizeAttempts } from '../cloud/client.js';
 import { levelMeter, micTestWidget, classifyInput } from './mictest.js';
 import { SpeechListener, sttSupport, STT_ERRORS } from '../audio/stt.js';
 import { compareWords, countsAsRead, describeDiff } from '../core/speech.js';
@@ -40,6 +41,8 @@ export class App {
   constructor({ root, data, prefs }) {
     this.root = root; this.data = data; this.prefs = prefs;
     this.ref = new ReferenceData(data.analysis);
+    this.cloud = new Cloud({ url: data.cloud?.url, anonKey: data.cloud?.anonKey, appVersion: 'v2-dev' });
+    this.cloud.addEventListener('expired', () => { try { toast('انتهت جلسة الدخول — سجّل الدخول لمتابعة الحفظ.'); } catch { /* */ } });
     this.overrides = loadOverrides(data.analysis);
     this.refreshHems();
     this.engine = null;
@@ -141,6 +144,7 @@ export class App {
         h('div', { class: 'sub-actions' },
           h('button', { class: 'btn', onclick: () => this.go('listen') }, icon('ear'), 'استماع فقط'),
           h('button', { class: 'btn', onclick: () => this.go('browse') }, icon('list'), 'فهرس الأبيات'),
+          h('button', { class: 'btn', id: 'btn-account', onclick: () => this.go('account') }, icon('info'), 'حسابي وتدريباتي'),
           h('button', { class: 'btn', onclick: () => this.go('settings') }, icon('gear'), 'الإعدادات'),
           h('button', { class: 'btn', onclick: () => this.go('about') }, icon('info'), 'كيف يعمل؟'))),
       h('div', { class: 'notice' }, icon('headphones'), h('div', null, h('b', null, 'يُنصح باستعمال سماعات. '), 'بدونها قد يلتقط الميكروفون صوت التسجيل فتنخفض الثقة أو يتعطّل التقييم الرقمي.')),
@@ -548,6 +552,7 @@ export class App {
         const sp = await finishListening({ withRef: true });
         this.results.set(a.idx, { res, at: Date.now(), hem: hm, speech: sp });
         showResult(hm, res, reason, sp);
+        this.persistAttempt(hm, res, sp, a.mode).then((st) => { const el = document.getElementById('save-status'); if (el) el.textContent = st; });
         if (this.prefs.repeat && reason === 'range-end' && this.screenName === 'practice') S.repTimer = setTimeout(() => { if (!isBusy() && this.screenName === 'practice') sing(); }, 2200);
       } else {
         if (S.listening) { await stt.stop(); S.listening = false; }
@@ -582,6 +587,7 @@ export class App {
           h('button', { class: 'btn', onclick: () => this.go('review', { items: [{ h: hm, res }], title: `مراجعة الشطر ${this.d(hm.index + 1)}`, kind: 'line' }) }, 'التفاصيل'),
           h('button', { class: 'btn primary', onclick: () => sing() }, 'أعد المحاولة')),
         spLine,
+        h('div', { class: 'small muted', id: 'save-status' }),
         h('ul', { class: 'notes', style: { marginTop: '12px' } }, notes.slice(0, sp ? 1 : 3).map((n) => h('li', { class: n.severity }, h('span', { class: 'sym' }, n.severity === 'good' ? '✓' : n.severity === 'bad' ? '✕' : n.severity === 'gray' ? '–' : '▲'), n.text))));
       result.classList.add('result-anchor');   // هامش تمرير سفلي يتجاوز الشريط اللاصق
       requestAnimationFrame(() => { try { result.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); } catch { /* */ } });
@@ -739,6 +745,50 @@ export class App {
   }
 
   // ───────────────────────── كيف يعمل ─────────────────────────
+  /** حفظ المحاولة في قاعدتك (للمسجَّل فقط) — نتيجة فقط؛ لا تسجيل صوتي يُرفع هنا. يعيد نصًا لحالة الحفظ. */
+  async persistAttempt(hm, res, sp, mode) {
+    if (!this.cloud.configured) return 'الحفظ السحابي غير مُعدّ.';
+    if (!this.cloud.user) return 'سجّل الدخول من «حسابي وتدريباتي» لحفظ تقدمك بين الأجهزة.';
+    const measurable = res.overall != null && !!sp && !sp.guard;
+    const rec = { client_attempt_id: uuid(), poem_id: 'saif-asdaq', hem_id: `h${hm.index}`, hem_index: hm.index, mode,
+      overall: res.overall ?? null, pitch_score: res.pitch ?? null, timing_score: res.timing ?? null,
+      heard_text: sp?.text || null, words_verdict: sp?.cmp?.verdict || null, words_json: sp && !sp.guard ? sp.cmp.items.map((x) => ({ expected: x.expected, expectedNorm: x.expectedNorm, heard: x.heard, status: x.status })) : null,
+      read_counted: !!sp && !sp.guard && countsAsRead(sp.cmp), measurable, scoring_engine: 'v1-pitch-timing', speech_engine: 'webspeech-ar-SA' };
+    try { const r = await this.cloud.saveAttempt(rec); return r.status === 'saved' ? 'حُفظت المحاولة في حسابك ✓' : r.status === 'queued' ? 'لم تُحفظ بعد (لا اتصال) — ستُرسل تلقائيًا ولن تتكرر.' : 'ضيف: لم تُحفظ.'; }
+    catch (e) { return `تعذّر الحفظ: ${e.message}`; }
+  }
+
+  screen_account() {
+    const c = this.cloud, box = h('div', { class: 'col', style: { gap: '12px' } });
+    const el = h('div', { class: 'wrap col' }, this.top('حسابي وتدريباتي'), box);
+    const render = async () => {
+      if (!c.configured) { box.replaceChildren(h('div', { class: 'card col' }, h('b', null, 'الحفظ السحابي غير مُعدّ في هذه النسخة'), h('p', { class: 'small muted' }, 'التدريب والاستماع يعملان كضيف. لتفعيل الحسابات ضع رابط مشروع Supabase والمفتاح العلني في data/cloud-config.json (انظر HANDOFF.md).'))); return; }
+      if (!c.user) {
+        const em = h('input', { type: 'email', id: 'acc-email', dir: 'ltr', autocomplete: 'email', placeholder: 'البريد الإلكتروني', style: { padding: '10px', borderRadius: '10px' } });
+        const pw = h('input', { type: 'password', id: 'acc-pass', dir: 'ltr', autocomplete: 'current-password', placeholder: 'كلمة المرور (٨ أحرف فأكثر)', style: { padding: '10px', borderRadius: '10px' } });
+        const msg = h('div', { class: 'small', role: 'status', id: 'acc-msg' });
+        const run = (fn) => async (ev) => { const b = ev.currentTarget; b.disabled = true; msg.textContent = '…'; try { const r = await fn(); if (r?.needsConfirm) msg.textContent = 'أُنشئ الحساب. افتح رابط التأكيد في بريدك ثم سجّل الدخول.'; else render(); } catch (e) { msg.textContent = e.kind === 'network' ? 'تعذّر الاتصال بالخادم — جرّب لاحقًا.' : `لم ينجح: ${e.message}`; } finally { b.disabled = false; } };
+        box.replaceChildren(h('div', { class: 'card col' }, h('b', null, 'سجّل الدخول لحفظ تقدمك بين الأجهزة'), h('div', { class: 'small muted' }, 'يمكنك الاستماع والتدريب كضيف دون حساب. الحساب يحفظ نتائج محاولاتك فقط، لا تسجيلاتك.'), em, pw,
+          h('div', { class: 'row', style: { gap: '8px' } }, h('button', { class: 'btn primary', id: 'btn-login', onclick: run(() => c.signIn(em.value.trim(), pw.value)) }, 'دخول'), h('button', { class: 'btn', id: 'btn-signup', onclick: run(() => c.signUp(em.value.trim(), pw.value)) }, 'إنشاء حساب')), msg));
+        return;
+      }
+      box.replaceChildren(h('div', { class: 'card col' }, h('div', null, 'الحساب: ', h('b', { dir: 'ltr' }, c.user.email || c.user.id)), h('div', { class: 'small muted', id: 'pending-n' }, c.pending.length ? `محاولات بانتظار الإرسال: ${this.d(c.pending.length)}` : ''),
+        h('button', { class: 'btn', id: 'btn-logout', onclick: async () => { await c.signOut(); render(); } }, 'تسجيل الخروج')), h('div', { class: 'card', id: 'mine' }, 'يُحمَّل تقدّمك…'));
+      try {
+        await c.flush(); const rows = await c.listAttempts(); const sm = summarizeAttempts(rows); const mine = box.querySelector('#mine');
+        if (!rows.length) { mine.replaceChildren(h('div', { class: 'muted' }, 'لا محاولات محفوظة بعد. تدرّب على شطر وستظهر هنا.')); return; }
+        const L = sm.lastAttempt;
+        mine.replaceChildren(h('h3', null, 'تدريباتي'),
+          h('div', { id: 'mine-last' }, `آخر موضع: الشطر ${this.d((L.hem_index ?? 0) + 1)}${L.created_at && !isNaN(new Date(L.created_at)) ? ' — ' + new Date(L.created_at).toLocaleString('ar-SA') : ''}`, h('button', { class: 'btn small', style: { marginInlineStart: '8px' }, onclick: () => { this.setIdx(L.hem_index ?? 0); this.go(this.engine?.micOn ? 'practice' : 'setup'); } }, 'تابع من هنا')),
+          h('div', { class: 'small', id: 'mine-count' }, `عدد المحاولات: ${this.d(rows.length)}`),
+          h('ul', { id: 'mine-hems' }, sm.hems.map((e) => h('li', null, `الشطر ${this.d((e.hem_index ?? 0) + 1)}: ${this.d(e.attempts)} محاولة · آخر نتيجة ${e.last.overall != null ? this.d(Math.round(e.last.overall * 100)) + '٪' : 'غير مقيسة'}`))),
+          h('h3', null, 'راجع كلماتي'), sm.wordsToReview.length ? h('ul', { id: 'mine-words', lang: 'ar' }, sm.wordsToReview.map((w) => h('li', null, h('b', null, w.word), ` — احتاجت إعادة ${this.d(w.n)} مرة`, h('button', { class: 'btn small', style: { marginInlineStart: '8px' }, onclick: () => { const i = Number(w.hem_id.slice(1)); this.setIdx(i); this.go(this.engine?.micOn ? 'practice' : 'setup'); } }, 'تدرّب')))) : h('div', { class: 'muted small' }, 'لا كلمات تحتاج مراجعة (أو لا قياس كافٍ بعد).'));
+      } catch (e) { box.querySelector('#mine').textContent = e.kind === 'network' ? 'تعذّر تحميل تقدمك الآن (لا اتصال). محاولاتك المعلّقة ستُرسل تلقائيًا.' : `تعذّر التحميل: ${e.message}`; }
+    };
+    render();
+    return { el, dispose: () => {} };
+  }
+
   screen_about() {
     const a = this.data.analysis;
     const warns = a.qualityWarnings.map((w) => h('li', null, h('b', null, w.code || w.id || ''), ' — ', w.message || w.text || ''));

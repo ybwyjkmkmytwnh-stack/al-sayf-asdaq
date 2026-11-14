@@ -63,7 +63,8 @@ async function boot() {
     assertAnalysisMatches(analysis, { audioHash, textHash });
     L.set('verify', 'done', 1, 'تطابق ✓');
     const audioUrl = URL.createObjectURL(new Blob([audioBuf], { type: 'audio/mpeg' }));
-    const app = new App({ root, data: { analysis, poem, prosody, audioUrl, audioHash, textHash, audioBytes: audioBuf.byteLength }, prefs });
+    let cloud = {}; try { cloud = JSON.parse(new TextDecoder().decode(await fetchWithProgress('data/cloud-config.json'))); } catch { /* ضيف */ }
+    const app = new App({ root, data: { analysis, poem, prosody, cloud, audioUrl, audioHash, textHash, audioBytes: audioBuf.byteLength }, prefs });
     window.__karaoke = { app, version: APP_VERSION, data: app.data, get engine() { return app.engine; }, ref: app.ref };
     window.__karaokeBoot = { state: 'ready' };
     app.go('home');

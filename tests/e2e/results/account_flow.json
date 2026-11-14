@@ -1,0 +1,15 @@
+{
+ "status_after_attempt": "حُفظت المحاولة في حسابك ✓",
+ "server_rows_after_attempt": 1,
+ "status_when_server_down": "لم تُحفظ بعد (لا اتصال) — ستُرسل تلقائيًا ولن تتكرر.",
+ "pending": 1,
+ "rows_after_flush": 2,
+ "pending_after_flush": 0,
+ "new_browser_count_text": "عدد المحاولات: ٢",
+ "new_browser_last": "آخر موضع: الشطر ١ — Invalid Dateتابع من هنا",
+ "new_browser_words": [
+  "إِنْبَاءً — احتاجت إعادة ١ مرةتدرّب"
+ ],
+ "second_user_view": "لا محاولات محفوظة بعد. تدرّب على شطر وستظهر هنا.",
+ "pageerrors": []
+}

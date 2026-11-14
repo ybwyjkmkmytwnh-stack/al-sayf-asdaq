@@ -1,0 +1,4 @@
+.env
+.env.local
+node_modules/
+tests/e2e/results/*.tmp

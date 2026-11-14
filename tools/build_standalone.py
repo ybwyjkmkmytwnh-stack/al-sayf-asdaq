@@ -85,6 +85,7 @@ def main():
             ("'data/reference_analysis.json'", "__ASSETS.analysis"),
             ("'data/poem.json'", "__ASSETS.poem"),
             ("'data/prosody.json'", "__ASSETS.prosody"),
+            ("'data/cloud-config.json'", "__ASSETS.cloud"),
             ("'audio/reference.mp3'", "__ASSETS.audio"),
         ],
     })
@@ -95,6 +96,7 @@ def main():
         "analysis": b64(WEB / "data/reference_analysis.json", "application/json"),
         "poem": b64(WEB / "data/poem.json", "application/json"),
         "prosody": b64(WEB / "data/prosody.json", "application/json"),
+        "cloud": b64(WEB / "data/cloud-config.json", "application/json") if (WEB / "data/cloud-config.json").exists() else "data:application/json;base64,e30=",
         "audio": b64(WEB / "audio/reference.mp3", "audio/mpeg"),
     }
     boot = (
